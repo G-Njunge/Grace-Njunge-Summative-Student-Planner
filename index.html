@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orderly</title>
+    <meta name="description" content="Organize your academic tasks, events, and deadlines with our intuitive campus life planner">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="styles/main.css" as="style">
+    <!-- Use modulepreload for ES module entry so the browser doesn't warn about unused preload -->
+    <link rel="modulepreload" href="scripts/main.js">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+</head>
+<body>
+    <!-- Skip to content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Header -->
+    <header class="header" role="banner">
+        <nav class="nav" role="navigation" aria-label="Main navigation">
+            <div class="nav-container">
+                <div class="logo">
+                    <div class="logo-icon">📚</div>
+                    <div>
+                        <h1>Orderly</h1>
+                        <span class="tagline">Say goodbye to chaos</span>
+                    </div>
+                </div>
+                <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                    <span class="hamburger"></span>
+                    <span class="hamburger"></span>
+                    <span class="hamburger"></span>
+                </button>
+                <ul class="nav-menu" role="menubar">
+                    <li role="none"><a href="#dashboard" role="menuitem" class="nav-link">Dashboard</a></li>
+                    <li role="none"><a href="#tasks" role="menuitem" class="nav-link">Tasks</a></li>
+                    <li role="none"><a href="#add-task" role="menuitem" class="nav-link">Add Task</a></li>
+                    <li role="none"><a href="#settings" role="menuitem" class="nav-link">Settings</a></li>
+                    <li role="none"><a href="#about" role="menuitem" class="nav-link">About</a></li>
+                    <li role="none"><a href="tests.html" role="menuitem" class="nav-link">Tests</a></li>
+                    <li role="none"><a href="#dashboard" role="menuitem" class="nav-link btn btn-primary">Get Started</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main" role="main">
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <span class="hero-title-main">Academic Success</span>
+                            <span class="hero-title-sub">Starts Here</span>
+                        </h1>
+                        <p class="hero-description">
+                            Empowering students with the tools, knowledge, and support they need for academic excellence—because every student deserves to thrive.
+                        </p>
+                        <div class="hero-buttons">
+                            <a href="#app" class="btn btn-primary btn-large">
+                                <span>🎓</span>
+                                Get Started
+                            </a>
+                            <a href="#features" class="btn btn-outline btn-large">
+                                Learn More
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="phone-mockup">
+                            <div class="phone-screen">
+                                <div class="app-preview">
+                                    <div class="app-header">
+                                        <div class="app-icon">📚</div>
+                                        <span>Campus Life</span>
+                                    </div>
+                                    <div class="app-content">
+                                        <div class="task-item">
+                                            <div class="task-icon">📝</div>
+                                            <div class="task-info">
+                                                <div class="task-title">React Formative</div>
+                                                <div class="task-meta">Due in 2 days</div>
+                                            </div>
+                                        </div>
+                                        <div class="task-item">
+                                            <div class="task-icon">🔬</div>
+                                            <div class="task-info">
+                                                <div class="task-title">Flexbox assignment</div>
+                                                <div class="task-meta">Due tomorrow</div>
+                                            </div>
+                                        </div>
+                                        <div class="task-item">
+                                            <div class="task-icon">📖</div>
+                                            <div class="task-info">
+                                                <div class="task-title">Responsive design</div>
+                                                <div class="task-meta">Due next week</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="floating-elements">
+                            <div class="floating-icon">📊</div>
+                            <div class="floating-icon">🎯</div>
+                            <div class="floating-icon">⏰</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="section">
+            <div class="container">
+                <h2 class="section-title">Why Students Choose Campus Life Planner</h2>
+                <div class="features-grid">
+                    <div class="feature-card glass-effect">
+                        <div class="feature-icon">📚</div>
+                        <h3>Smart Task Management</h3>
+                        <p>Organize assignments, projects, and deadlines with intelligent categorization and priority tracking.</p>
+                    </div>
+                    <div class="feature-card glass-effect">
+                        <div class="feature-icon">⏰</div>
+                        <h3>Time Optimization</h3>
+                        <p>Track study time, set realistic goals, and optimize your schedule for maximum productivity.</p>
+                    </div>
+                    <div class="feature-card glass-effect">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Progress Tracking</h3>
+                        <p>Monitor your academic journey with detailed analytics and achievement milestones.</p>
+                    </div>
+                    <div class="feature-card glass-effect">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Advanced Search</h3>
+                        <p>Find tasks instantly with powerful search capabilities and smart filtering options.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="section">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3>Add Your Tasks</h3>
+                        <p>Quickly add assignments, projects, and deadlines with due dates and duration estimates.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3>Track Progress</h3>
+                        <p>Monitor your productivity with real-time statistics and visual progress indicators.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h3>Achieve Goals</h3>
+                        <p>Set weekly targets and celebrate milestones as you work toward academic success.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- App Section -->
+        <section id="app" class="section active">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="app-section" aria-labelledby="dashboard-heading">
+            <div class="container">
+                <h2 id="dashboard-heading" class="section-title">Dashboard</h2>
+                
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card glass-effect">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-content">
+                            <h3>Total Tasks</h3>
+                            <p class="stat-number" id="total-tasks">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card glass-effect">
+                        <div class="stat-icon">⏰</div>
+                        <div class="stat-content">
+                            <h3>Total Duration</h3>
+                            <p class="stat-number" id="total-duration">0h 0m</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card glass-effect">
+                        <div class="stat-icon">🏷️</div>
+                        <div class="stat-content">
+                            <h3>Top Tag</h3>
+                            <p class="stat-number" id="top-tag">-</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card glass-effect">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-content">
+                            <h3>This Week</h3>
+                            <p class="stat-number" id="week-tasks">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cap/Target Section -->
+                <div class="cap-section glass-effect">
+                    <h3>Weekly Goal</h3>
+                    <div class="cap-controls">
+                        <label for="duration-cap" class="cap-label">Set weekly duration target (hours):</label>
+                        <input type="number" id="duration-cap" class="cap-input" min="0" step="0.5" value="40">
+                        <button id="update-cap" class="btn btn-primary">Update</button>
+                    </div>
+                    <div id="cap-status" class="cap-status" role="status" aria-live="polite"></div>
+                </div>
+                
+                <!-- Recent Tasks -->
+                <div class="recent-tasks glass-effect">
+                    <h3>Recent Tasks</h3>
+                    <div id="recent-tasks-list" class="tasks-preview">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tasks Section -->
+        <section id="tasks" class="section" aria-labelledby="tasks-heading">
+            <div class="container">
+                <h2 id="tasks-heading" class="section-title">Your Tasks</h2>
+                
+                <!-- Search and Filter Controls -->
+                <div class="controls glass-effect">
+                    <div class="search-container">
+                        <label for="search-input" class="search-label">Search Tasks:</label>
+                        <input type="text" id="search-input" class="search-input" placeholder="Enter search pattern...">
+                        <div class="search-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="case-sensitive" class="checkbox">
+                                Case sensitive
+                            </label>
+                            <button id="clear-search" class="btn btn-secondary">Clear</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <label for="sort-select" class="filter-label">Sort by:</label>
+                        <select id="sort-select" class="select">
+                            <option value="date-desc">Date (Newest First)</option>
+                            <option value="date-asc">Date (Oldest First)</option>
+                            <option value="title-asc">Title (A-Z)</option>
+                            <option value="title-desc">Title (Z-A)</option>
+                            <option value="duration-desc">Duration (Longest First)</option>
+                            <option value="duration-asc">Duration (Shortest First)</option>
+                            <option value="tag-asc">Tag (A-Z)</option>
+                        </select>
+                        
+                        <label for="tag-filter" class="filter-label">Filter by tag:</label>
+                        <select id="tag-filter" class="select">
+                            <option value="">All Tags</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Tasks Table/Grid -->
+                <div class="tasks-container">
+                    <div id="tasks-loading" class="loading" aria-live="polite">Loading tasks...</div>
+                    <div id="tasks-empty" class="empty-state" style="display: none;">
+                        <div class="empty-icon">📝</div>
+                        <h3>No tasks found</h3>
+                        <p>Start by adding your first task or adjust your search criteria.</p>
+                        <a href="#add-task" class="btn btn-primary">Add Task</a>
+                    </div>
+                    <div id="tasks-grid" class="tasks-grid">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add/Edit Task Section -->
+        <section id="add-task" class="section" aria-labelledby="add-task-heading">
+            <div class="container">
+                <h2 id="add-task-heading" class="section-title">Add New Task</h2>
+                
+                <form id="task-form" class="task-form glass-effect" novalidate>
+                    <div class="form-group">
+                        <label for="task-title" class="form-label">Task Title *</label>
+                        <input type="text" id="task-title" class="form-input" required 
+                               placeholder="e.g., Complete Math Assignment">
+                        <div class="error-message" id="title-error" role="alert"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-due-date" class="form-label">Due Date *</label>
+                        <input type="date" id="task-due-date" class="form-input" required>
+                        <div class="error-message" id="date-error" role="alert"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-duration" class="form-label">Estimated Duration (hours) *</label>
+                        <input type="number" id="task-duration" class="form-input" required 
+                               min="0" step="0.25" placeholder="2.5">
+                        <div class="error-message" id="duration-error" role="alert"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-tag" class="form-label">Tag *</label>
+                        <input type="text" id="task-tag" class="form-input" required 
+                               placeholder="e.g., Homework, Project, Exam">
+                        <div class="error-message" id="tag-error" role="alert"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-description" class="form-label">Description (Optional)</label>
+                        <textarea id="task-description" class="form-textarea" rows="4" 
+                                  placeholder="Additional details about this task..."></textarea>
+                        <div class="error-message" id="description-error" role="alert"></div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Task</button>
+                        <button type="button" id="cancel-edit" class="btn btn-secondary" style="display: none;">Cancel Edit</button>
+                        <button type="reset" class="btn btn-outline">Reset Form</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settings" class="section" aria-labelledby="settings-heading">
+            <div class="container">
+                <h2 id="settings-heading" class="section-title">Settings</h2>
+                
+                <div class="settings-grid">
+                    <!-- Data Management -->
+                    <div class="settings-card glass-effect">
+                        <h3>Data Management</h3>
+                        <div class="settings-group">
+                            <label for="backup-data" class="settings-label">Backup Data</label>
+                            <button id="backup-data" class="btn btn-primary">Create Backup</button>
+                            <p class="settings-description">Save your tasks to your device</p>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <label for="restore-data" class="settings-label">Restore Data</label>
+                            <input type="file" id="restore-data" accept=".txt" class="file-input">
+                            <p class="settings-description">Restore your tasks from a backup file</p>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <label class="settings-label">Clear All Data</label>
+                            <button id="clear-data" class="btn btn-danger">Clear All Tasks</button>
+                            <p class="settings-description">⚠️ This action cannot be undone</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Units & Display -->
+                    <div class="settings-card glass-effect">
+                        <h3>Units & Display</h3>
+                        <div class="settings-group">
+                            <label for="time-unit" class="settings-label">Default Time Unit</label>
+                            <select id="time-unit" class="select">
+                                <option value="hours">Hours</option>
+                                <option value="minutes">Minutes</option>
+                            </select>
+                            <p class="settings-description">Choose how duration is displayed</p>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <label for="date-format" class="settings-label">Date Format</label>
+                            <select id="date-format" class="select">
+                                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="settings-card glass-effect">
+                        <h3>Notifications</h3>
+                        <div class="settings-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="due-reminders" class="checkbox">
+                                Due date reminders
+                            </label>
+                            <p class="settings-description">Get notified about upcoming deadlines</p>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="goal-alerts" class="checkbox">
+                                Goal achievement alerts
+                            </label>
+                            <p class="settings-description">Celebrate when you reach your weekly goals</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section" aria-labelledby="about-heading">
+            <div class="container">
+                <h2 id="about-heading" class="section-title">About Campus Life Planner</h2>
+                
+                <div class="about-content glass-effect">
+                    <div class="about-hero">
+                        <h3>Your Academic Journey Companion</h3>
+                        <p>Campus Life Planner helps you organize your academic tasks, track your progress, and stay on top of your deadlines. Built with accessibility and usability in mind, this tool empowers students to take control of their academic life.</p>
+                    </div>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">📝</div>
+                            <h4>Task Management</h4>
+                            <p>Create, edit, and organize your academic tasks with due dates, duration estimates, and tags.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🔍</div>
+                            <h4>Smart Search</h4>
+                            <p>Find tasks using powerful regex patterns and advanced search capabilities.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">📊</div>
+                            <h4>Progress Tracking</h4>
+                            <p>Monitor your productivity with detailed statistics and goal tracking.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">♿</div>
+                            <h4>Accessibility First</h4>
+                            <p>Built with WCAG guidelines, supporting keyboard navigation and screen readers.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-info">
+                        <h4>Contact & Support</h4>
+                        <div class="contact-links">
+                            <a href="mailto:your-email@example.com" class="contact-link">
+                                📧 Email Support
+                            </a>
+                            <a href="https://github.com/your-username" class="contact-link" target="_blank" rel="noopener">
+                                🐙 GitHub Repository
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Campus Life Planner. Built with ❤️ for students everywhere.</p>
+                <div class="footer-links">
+                    <a href="#about">About</a>
+                    <a href="#settings">Settings</a>
+                    <a href="https://github.com/your-username" target="_blank" rel="noopener">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content glass-effect">
+            <h3 id="modal-title">Confirm Action</h3>
+            <p id="modal-message">Are you sure you want to proceed?</p>
+            <div class="modal-actions">
+                <button id="modal-confirm" class="btn btn-primary">Confirm</button>
+                <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="scripts/main.js"></script>
+</body>
+</html>

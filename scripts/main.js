@@ -1,0 +1,499 @@
+/**
+ * Main Application Entry Point
+ * Campus Life Planner - Student Task Management System
+ * 
+ * This module initializes the application and coordinates all modules
+ */
+
+import { initializeState, stateManager, uiActions } from '../../scripts/state.js';
+import { initializeUI, uiManager } from '../../scripts/ui.js';
+import { searchManager } from '../../scripts/search.js';
+
+/**
+ * Application class
+ */
+class CampusLifePlanner {
+  constructor() {
+    this.isInitialized = false;
+    this.version = '1.0.0';
+  }
+  
+  /**
+   * Initialize the application
+   */
+  async initialize() {
+    if (this.isInitialized) {
+      console.warn('Application already initialized');
+      return;
+    }
+    
+    try {
+      console.log(`Campus Life Planner v${this.version} initializing...`);
+
+      // Initialize UI first
+      try {
+        initializeUI();
+        console.log('UI initialized');
+      } catch (err) {
+        console.error('UI initialization failed:', err);
+      }
+
+      // Initialize state management
+      try {
+        initializeState();
+        console.log('State initialized');
+      } catch (err) {
+        console.error('State initialization failed:', err);
+      }
+
+      // Initialize search manager
+      try {
+        this.initializeSearchManager();
+        console.log('Search manager initialized');
+      } catch (err) {
+        console.error('Search manager initialization failed:', err);
+      }
+
+      // Setup global error handling
+      try {
+        this.setupErrorHandling();
+        console.log('Error handling set up');
+      } catch (err) {
+        console.error('Setup error handling failed:', err);
+      }
+
+      // Setup service worker for offline support
+      try {
+        await this.setupServiceWorker();
+        console.log('Service worker setup completed');
+      } catch (err) {
+        console.warn('Service Worker registration failed or skipped:', err);
+      }
+
+      // Setup keyboard shortcuts
+      try {
+        this.setupKeyboardShortcuts();
+        console.log('Keyboard shortcuts set');
+      } catch (err) {
+        console.error('Keyboard shortcuts setup failed:', err);
+      }
+
+      // Setup performance monitoring
+      try {
+        this.setupPerformanceMonitoring();
+        console.log('Performance monitoring set');
+      } catch (err) {
+        console.error('Performance monitoring setup failed:', err);
+      }
+
+      this.isInitialized = true;
+      console.log('Campus Life Planner initialized (partial failures may have occurred)');
+
+      // Announce to screen readers
+      try {
+        this.announceAppReady();
+      } catch (err) {
+        console.warn('announceAppReady failed:', err);
+      }
+      
+    } catch (error) {
+      console.error('Failed to initialize application:', error);
+      this.handleInitializationError(error);
+    }
+  }
+  
+  /**
+   * Initialize search manager
+   */
+  initializeSearchManager() {
+    // Listen for tasks changes to update search index
+    stateManager.subscribe('tasks', (tasks) => {
+      searchManager.initialize(tasks);
+    });
+  }
+  
+  /**
+   * Setup global error handling
+   */
+  setupErrorHandling() {
+    // Handle uncaught errors
+    window.addEventListener('error', (event) => {
+      console.error('Uncaught error:', event.error);
+      this.handleError(event.error);
+    });
+    
+    // Handle unhandled promise rejections
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      this.handleError(event.reason);
+    });
+    
+    // Handle state manager errors
+    stateManager.subscribe('error', (error) => {
+      if (error) {
+        this.handleError(error);
+      }
+    });
+  }
+  
+  /**
+   * Handle errors gracefully
+   * @param {Error|string} error - Error to handle
+   */
+  handleError(error) {
+    const errorMessage = typeof error === 'string' ? error : error.message || 'An unexpected error occurred';
+    
+    // Log error for debugging
+    console.error('Application error:', error);
+    
+    // Show user-friendly error message
+    stateManager.setState({
+      error: 'Something went wrong. Please try again or refresh the page.',
+      success: null
+    });
+    
+    // Report error to analytics (if available)
+    this.reportError(error);
+  }
+  
+  /**
+   * Handle initialization errors
+   * @param {Error} error - Initialization error
+   */
+  handleInitializationError(error) {
+    // Show critical error message
+    const errorContainer = document.createElement('div');
+    errorContainer.className = 'critical-error';
+    errorContainer.innerHTML = `
+      <div class="error-content">
+        <h2>Application Failed to Load</h2>
+        <p>We're sorry, but the Campus Life Planner couldn't be initialized properly.</p>
+        <p>Please try refreshing the page or contact support if the problem persists.</p>
+        <button onclick="window.location.reload()" class="btn btn-primary">
+          Refresh Page
+        </button>
+      </div>
+    `;
+    
+    // Style the error container
+    errorContainer.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      color: white;
+      font-family: system-ui, sans-serif;
+    `;
+    
+    document.body.appendChild(errorContainer);
+  }
+  
+  /**
+   * Setup service worker for offline support
+   */
+  async setupServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('Service Worker registered:', registration);
+        
+        // Handle updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New content is available
+              this.showUpdateNotification();
+            }
+          });
+        });
+        
+      } catch (error) {
+        console.warn('Service Worker registration failed:', error);
+      }
+    }
+  }
+  
+  /**
+   * Show update notification
+   */
+  showUpdateNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'update-notification';
+    notification.innerHTML = `
+      <div class="update-content">
+        <p>New version available!</p>
+        <button onclick="window.location.reload()" class="btn btn-primary">
+          Update Now
+        </button>
+        <button onclick="this.parentElement.parentElement.remove()" class="btn btn-secondary">
+          Later
+        </button>
+      </div>
+    `;
+    
+    // Style the notification
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      max-width: 300px;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.remove();
+      }
+    }, 10000);
+  }
+  
+  /**
+   * Setup keyboard shortcuts
+   */
+  setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      // Only handle shortcuts when not in input fields
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+      }
+      
+      // Alt + N: New task
+      if (e.altKey && e.key === 'n') {
+        e.preventDefault();
+        uiManager.navigateToSection('add-task');
+      }
+      
+      // Alt + D: Dashboard
+      if (e.altKey && e.key === 'd') {
+        e.preventDefault();
+        uiManager.navigateToSection('dashboard');
+      }
+      
+      // Alt + T: Tasks
+      if (e.altKey && e.key === 't') {
+        e.preventDefault();
+        uiManager.navigateToSection('tasks');
+      }
+      
+      // Alt + S: Settings
+      if (e.altKey && e.key === 's') {
+        e.preventDefault();
+        uiManager.navigateToSection('settings');
+      }
+      
+      // Alt + A: About
+      if (e.altKey && e.key === 'a') {
+        e.preventDefault();
+        uiManager.navigateToSection('about');
+      }
+      
+      // Escape: Close modal or cancel editing
+      if (e.key === 'Escape') {
+        if (stateManager.getState('showModal')) {
+          uiActions.hideModal(stateManager);
+        } else if (stateManager.getState('editingTaskId')) {
+          uiActions.cancelEditing(stateManager);
+        }
+      }
+    });
+  }
+  
+  /**
+   * Setup performance monitoring
+   */
+  setupPerformanceMonitoring() {
+    // Monitor page load performance
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const perfData = performance.getEntriesByType('navigation')[0];
+        if (perfData) {
+          console.log('Page load performance:', {
+            domContentLoaded: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
+            loadComplete: perfData.loadEventEnd - perfData.loadEventStart,
+            totalTime: perfData.loadEventEnd - perfData.fetchStart
+          });
+        }
+      }, 0);
+    });
+    
+    // Monitor memory usage (if available)
+    if ('memory' in performance) {
+      setInterval(() => {
+        const memory = performance.memory;
+        console.log('Memory usage:', {
+          used: Math.round(memory.usedJSHeapSize / 1024 / 1024) + ' MB',
+          total: Math.round(memory.totalJSHeapSize / 1024 / 1024) + ' MB',
+          limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024) + ' MB'
+        });
+      }, 30000); // Every 30 seconds
+    }
+  }
+  
+  /**
+   * Report error to analytics
+   * @param {Error|string} error - Error to report
+   */
+  reportError(error) {
+    // In a real application, you would send this to your analytics service
+    console.log('Error reported to analytics:', {
+      message: typeof error === 'string' ? error : error.message,
+      stack: typeof error === 'object' ? error.stack : null,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    });
+  }
+  
+  /**
+   * Announce app ready to screen readers
+   */
+  announceAppReady() {
+    // Create a live region for announcements
+    const liveRegion = document.createElement('div');
+    liveRegion.setAttribute('aria-live', 'polite');
+    liveRegion.setAttribute('aria-atomic', 'true');
+    liveRegion.className = 'sr-only';
+    liveRegion.textContent = 'Campus Life Planner loaded successfully';
+    document.body.appendChild(liveRegion);
+    
+    // Remove after announcement
+    setTimeout(() => {
+      liveRegion.remove();
+    }, 1000);
+  }
+  
+  /**
+   * Get application info
+   * @returns {Object} Application information
+   */
+  getAppInfo() {
+    return {
+      name: 'Campus Life Planner',
+      version: this.version,
+      initialized: this.isInitialized,
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      online: navigator.onLine,
+      storage: {
+        available: 'localStorage' in window,
+        quota: this.getStorageQuota()
+      }
+    };
+  }
+  
+  /**
+   * Get storage quota information
+   * @returns {Object} Storage quota info
+   */
+  getStorageQuota() {
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      return navigator.storage.estimate().then(estimate => ({
+        quota: estimate.quota,
+        usage: estimate.usage,
+        available: estimate.quota - estimate.usage
+      }));
+    }
+    return null;
+  }
+  
+  /**
+   * Cleanup application resources
+   */
+  cleanup() {
+    // Clear any timers
+    // Remove event listeners
+    // Clean up state
+    this.isInitialized = false;
+    console.log('Application cleaned up');
+  }
+}
+
+/**
+ * Global application instance
+ */
+const app = new CampusLifePlanner();
+
+/**
+ * Initialize application when DOM is ready
+ */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    app.initialize();
+  });
+} else {
+  app.initialize();
+}
+
+/**
+ * Handle page visibility changes
+ */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // Page is hidden - save current state
+    console.log('Page hidden - saving state');
+  } else {
+    // Page is visible - refresh data if needed
+    console.log('Page visible - refreshing state');
+  }
+});
+
+/**
+ * Handle online/offline status
+ */
+window.addEventListener('online', () => {
+  console.log('Application is online');
+  stateManager.setState({
+    success: 'Connection restored'
+  });
+});
+
+window.addEventListener('offline', () => {
+  console.log('Application is offline');
+  stateManager.setState({
+    error: 'You are currently offline. Some features may not work properly.'
+  });
+});
+
+/**
+ * Handle beforeunload to save data
+ */
+window.addEventListener('beforeunload', (e) => {
+  // Save any pending changes
+  const tasks = stateManager.getState('tasks');
+  if (tasks.length > 0) {
+    // Import save function dynamically to avoid circular dependency
+    import('../../scripts/storage.js').then(({ saveTasks }) => {
+      saveTasks(tasks);
+    });
+  }
+});
+
+/**
+ * Expose app instance globally for debugging
+ */
+if (typeof process !== 'undefined' && process && process.env && process.env.NODE_ENV === 'development') {
+  window.campusLifePlanner = app;
+  window.stateManager = stateManager;
+  window.uiManager = uiManager;
+  window.searchManager = searchManager;
+}
+
+/**
+ * Export for module usage
+ */
+export default app;

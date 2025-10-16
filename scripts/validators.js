@@ -24,12 +24,50 @@ export const VALIDATION_RULES = {
   },
   
   date: {
-    pattern: /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/,
-    message: 'Date must be in YYYY-MM-DD format and be a valid date',
+    // Accept either YYYY-MM-DD or YYYY-MM-DDTHH:MM (basic ISO date or ISO date+time)
+    pattern: /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])(?:T([01]\d|2[0-3]):[0-5][0-9])?$/,
+    message: 'Date must be in YYYY-MM-DD or YYYY-MM-DDTHH:MM format and be a valid date/time',
     test: (value) => {
       if (!value) return false;
-      const date = new Date(value);
-      return date instanceof Date && !isNaN(date) && date.toISOString().split('T')[0] === value;
+      // If it's a pure date (YYYY-MM-DD), validate that exact date
+      const parts = String(value).split('T');
+      const datePart = parts[0];
+      const date = new Date(datePart);
+      if (!(date instanceof Date) || isNaN(date)) return false;
+      if (date.toISOString().split('T')[0] !== datePart) return false;
+
+      // If time present, validate HH:MM portion
+      if (parts[1]) {
+        return ADVANCED_PATTERNS.timeFormat.test(parts[1]);
+      }
+
+      return true;
+    }
+  },
+
+  // Alias for tasks that reference dueDate directly
+  dueDate: {
+    pattern: /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])(?:T([01]\d|2[0-3]):[0-5][0-9])?$/,
+    message: 'Due date must be in YYYY-MM-DD or YYYY-MM-DDTHH:MM format',
+    test: (value) => {
+      // reuse date logic
+      const parts = String(value).split('T');
+      const datePart = parts[0];
+      const date = new Date(datePart);
+      if (!(date instanceof Date) || isNaN(date)) return false;
+      if (date.toISOString().split('T')[0] !== datePart) return false;
+      if (parts[1]) return ADVANCED_PATTERNS.timeFormat.test(parts[1]);
+      return true;
+    }
+  },
+
+  // Time-only validator (used when validating separate time inputs)
+  time: {
+    pattern: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+    message: 'Time must be in HH:MM format',
+    test: (value) => {
+      if (!value) return true; // allow empty (optional)
+      return ADVANCED_PATTERNS.timeFormat.test(value);
     }
   },
   

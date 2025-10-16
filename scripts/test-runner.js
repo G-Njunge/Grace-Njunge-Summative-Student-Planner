@@ -376,6 +376,49 @@ function runSearchTests(createTestSection, renderTestResults) {
     section.innerHTML = renderTestResults();
 }
 
+function runSmokeTests(createTestSection, renderTestResults) {
+    const section = createTestSection('Smoke Tests');
+
+    runTest("Today's tasks ordering by time then duration", () => {
+        // Build three tasks for today: one at 08:30 (short), one at 09:00 (long), and one date-only
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+
+        const tasks = [
+            { id: 't1', title: 'Date-only task', dueDate: dateStr, duration: 1 },
+            { id: 't2', title: 'Morning long', dueDate: `${dateStr}T09:00`, duration: 3 },
+            { id: 't3', title: 'Early short', dueDate: `${dateStr}T08:30`, duration: 1.5 }
+        ];
+
+        // Filter tasks for today similar to UI logic
+        const todays = tasks.filter(t => t.dueDate && String(t.dueDate).startsWith(dateStr));
+
+        // Sort by datetime asc, timed tasks before date-only, then duration desc
+        todays.sort((a, b) => {
+            const aDt = a.dueDate ? new Date(a.dueDate) : null;
+            const bDt = b.dueDate ? new Date(b.dueDate) : null;
+
+            if (aDt && bDt) {
+                const diff = aDt - bDt;
+                if (diff !== 0) return diff;
+            } else if (aDt && !bDt) {
+                return -1;
+            } else if (!aDt && bDt) {
+                return 1;
+            }
+
+            return parseFloat(b.duration || 0) - parseFloat(a.duration || 0);
+        });
+
+        // Expect order: t3 (08:30), t2 (09:00), t1 (date-only)
+        assert(todays[0].id === 't3', 'First task should be earliest timed task (t3)');
+        assert(todays[1].id === 't2', 'Second task should be next timed task (t2)');
+        assert(todays[2].id === 't1', 'Third should be date-only task (t1)');
+    });
+
+    section.innerHTML = renderTestResults();
+}
+
 function createTestSection(title) {
     const resultsDiv = document.getElementById('test-results');
     const section = document.createElement('div');
@@ -412,6 +455,7 @@ window.runAllTests = function() {
     runAdvancedRegexTests(createTestSection, renderTestResults);
     runStorageTests(createTestSection, renderTestResults);
     runSearchTests(createTestSection, renderTestResults);
+    runSmokeTests(createTestSection, renderTestResults);
 
     updateStats();
     console.log('Test Results:', testResults);

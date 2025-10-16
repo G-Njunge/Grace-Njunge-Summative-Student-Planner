@@ -48,7 +48,6 @@
           <li role="none"><a href="index.html#hero" role="menuitem" class="nav-link">Home</a></li>
           <li role="none"><a href="dashboard.html#dashboard" role="menuitem" class="nav-link">Dashboard</a></li>
           <li role="none"><a href="tasks.html#tasks" role="menuitem" class="nav-link">Tasks</a></li>
-          <li role="none"><a href="tasks.html#add-task" role="menuitem" class="nav-link">Add Task</a></li>
           <li role="none"><a href="dashboard.html#settings" role="menuitem" class="nav-link">Settings</a></li>
           <li role="none"><a href="dashboard.html#about" role="menuitem" class="nav-link">About</a></li>
           <li role="none"><a href="tests.html" role="menuitem" class="nav-link">Tests</a></li>
@@ -118,6 +117,11 @@
               <label for="task-due-date" class="form-label">Due Date *</label>
               <input type="date" id="task-due-date" class="form-input" required>
               <div class="error-message" id="date-error" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="task-due-time" class="form-label">Due Time (optional)</label>
+              <input type="time" id="task-due-time" class="form-input">
+              <div class="error-message" id="time-error" role="alert"></div>
             </div>
             <div class="form-group">
               <label for="task-duration" class="form-label">Estimated Duration (hours) *</label>

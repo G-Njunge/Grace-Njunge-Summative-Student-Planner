@@ -41,6 +41,8 @@ const SELECTORS = {
   completedTasks: '#completed-tasks',
   capStatus: '#cap-status',
   todaysTasksList: '#todays-tasks-list',
+  weeklyProgressCanvas: '#weekly-progress-canvas',
+  weeklyChartTooltip: '#weekly-chart-tooltip',
   capInput: '#duration-cap',
   updateCapBtn: '#update-cap',
   
@@ -48,6 +50,7 @@ const SELECTORS = {
   taskForm: '#task-form',
   taskTitle: '#task-title',
   taskDueDate: '#task-due-date',
+  taskDueTime: '#task-due-time',
   taskDuration: '#task-duration',
   taskTag: '#task-tag',
   taskDescription: '#task-description',
@@ -93,6 +96,8 @@ class UIManager {
     this.bindEvents();
     this.setupStateListeners();
     this.setupAccessibility();
+    // Make charts responsive
+    this.setupChartResize();
     
     // Honor current URL hash on initial load
     this.handleHashChange();
@@ -545,6 +550,7 @@ class UIManager {
       this.updateDashboard();
       this.updateTagFilter();
       this.renderTodaysTasks();
+      this.renderWeeklyChart();
     });
     
     stateManager.subscribe('currentSection', (section) => {
@@ -559,6 +565,7 @@ class UIManager {
     stateManager.subscribe('stats', (stats) => {
       this.updateDashboard();
       this.renderTodaysTasks();
+      this.renderWeeklyChart();
     });
     
     // capSettings and homepage-only widgets removed from index.html
@@ -586,6 +593,7 @@ class UIManager {
     // Listen for capSettings updates specifically
     stateManager.subscribe('capSettings', (capSettings) => {
       if (capSettings) this.updateCapStatus(capSettings);
+      this.renderWeeklyChart();
     });
 
     // Recent dropdown removed — no-op
@@ -946,9 +954,9 @@ class UIManager {
    * @returns {string} HTML string
    */
   createTaskCard(task) {
-    const dueDate = new Date(task.dueDate);
+    const dueDate = task.dueDate ? new Date(task.dueDate) : null;
     const now = new Date();
-    const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+    const daysUntilDue = dueDate ? Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24)) : Infinity;
     
     let statusClass = '';
     let statusText = '';
@@ -961,8 +969,8 @@ class UIManager {
       statusText = 'Due Soon';
     }
     
-    const formattedDate = dueDate.toLocaleDateString();
-    const duration = parseFloat(task.duration);
+  const formattedDate = dueDate ? dueDate.toLocaleDateString() : '-';
+  const duration = parseFloat(task.duration);
     const durationText = duration >= 1 ? 
       `${duration} hour${duration !== 1 ? 's' : ''}` : 
       `${Math.round(duration * 60)} minutes`;
@@ -1090,9 +1098,12 @@ class UIManager {
     }
 
     // Map validator-friendly names to the state shape expected by taskActions
+    // Combine date and time (if provided) into an ISO-like datetime for storage/comparison
+    const due = formData.date ? (formData.time ? `${formData.date}T${formData.time}` : String(formData.date)) : '';
+
     const payload = {
       title: formData.title,
-      dueDate: formData.date,
+      dueDate: due,
       duration: formData.duration,
       tag: formData.tag,
       description: formData.description
@@ -1116,6 +1127,7 @@ class UIManager {
     return {
       title: this.elements.taskTitle?.value || '',
       date: this.elements.taskDueDate?.value || '',
+      time: this.elements.taskDueTime?.value || '',
       duration: this.elements.taskDuration?.value || '',
       tag: this.elements.taskTag?.value || '',
       description: this.elements.taskDescription?.value || ''
@@ -1325,8 +1337,23 @@ class UIManager {
     // Filter tasks due today and not deleted
     const todays = tasks.filter(t => t.dueDate && String(t.dueDate).startsWith(todayStr));
 
-    // Sort by duration descending (longest first)
-    todays.sort((a, b) => parseFloat(b.duration || 0) - parseFloat(a.duration || 0));
+    // Sort by due datetime ascending (earlier first). If no time provided, date-only tasks come after timed tasks for the same day.
+    todays.sort((a, b) => {
+      const aDt = a.dueDate ? new Date(a.dueDate) : null;
+      const bDt = b.dueDate ? new Date(b.dueDate) : null;
+
+      if (aDt && bDt) {
+        const diff = aDt - bDt;
+        if (diff !== 0) return diff;
+      } else if (aDt && !bDt) {
+        return -1; // a has time, b doesn't -> a first
+      } else if (!aDt && bDt) {
+        return 1; // b has time, a doesn't -> b first
+      }
+
+      // Tie-breaker: longer duration first
+      return parseFloat(b.duration || 0) - parseFloat(a.duration || 0);
+    });
 
     if (todays.length === 0) {
       container.innerHTML = '<div class="empty-state" style="padding:12px;color:var(--gray-300)">No tasks for today</div>';
@@ -1335,7 +1362,7 @@ class UIManager {
 
     // Build a semantic list
     const listHtml = todays.map(task => {
-      const due = task.dueDate ? new Date(task.dueDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-';
+  const due = task.dueDate ? new Date(task.dueDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-';
       const durationVal = parseFloat(task.duration || 0);
       const duration = task.duration ? `${durationVal} h` : '-';
       const longAttr = durationVal >= 2 ? 'data-duration-long="true"' : '';
@@ -1388,6 +1415,239 @@ class UIManager {
       this.elements.capStatus.textContent = `${(durationCap - currentWeekDuration).toFixed(1)} hours remaining (${percentage}%)`;
       this.elements.capStatus.setAttribute('aria-live', 'polite');
     }
+  }
+
+  /**
+   * Render weekly progress chart: compares per-day achieved hours (completed tasks) vs goal-per-day
+   */
+  renderWeeklyChart() {
+    const canvas = document.querySelector('#weekly-progress-canvas');
+    if (!canvas || !canvas.getContext) return;
+
+    const ctx = canvas.getContext('2d');
+    // Ensure the canvas backing store matches the displayed CSS size for crisp rendering
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    const pixelWidth = Math.max(1, Math.floor(rect.width * dpr));
+    const pixelHeight = Math.max(1, Math.floor(rect.height * dpr));
+    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+      canvas.width = pixelWidth;
+      canvas.height = pixelHeight;
+    }
+
+    // Reset transform and clear (use setTransform to avoid accumulating scale)
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const tasks = stateManager.getState('tasks') || [];
+    const capSettings = stateManager.getState('capSettings') || { durationCap: stateManager.getState('settings')?.durationCap || 40 };
+    const durationCap = capSettings.durationCap || 0;
+
+    // Build last 7 days array (labels and 0-initialized hours), and compute cumulative
+    const days = [];
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().split('T')[0];
+      days.push({ key, label: d.toLocaleDateString(undefined, { weekday: 'short' }), date: d, hours: 0 });
+    }
+
+    // Sum durations of tasks completed on each day using completedAt timestamp;
+    // fall back to updatedAt if completedAt is missing (helps imported/older tasks)
+    tasks.forEach(t => {
+      if (!t.completed) return;
+      const completedTs = t.completedAt || t.updatedAt || null;
+      if (!completedTs) return;
+      const completedDate = new Date(completedTs);
+      if (isNaN(completedDate.getTime())) return;
+      const k = completedDate.toISOString().split('T')[0];
+      const day = days.find(d => d.key === k);
+      if (day) day.hours += parseFloat(t.duration || 0) || 0;
+    });
+
+    // Goal per day (distribute evenly)
+    const goalPerDay = durationCap / 7;
+    // Drawing parameters (fluid height based on rect)
+    const padding = 28;
+    const cssWidth = rect.width;
+    const cssHeight = rect.height;
+    const chartWidth = cssWidth - padding * 2;
+    const chartHeight = cssHeight - padding * 2;
+
+    // Compute per-day counts: tasks set (createdAt) and tasks achieved (completedAt/updatedAt)
+    const perDaySet = days.map(d => 0);
+    const perDayAchieved = days.map(d => 0);
+
+    tasks.forEach(t => {
+      // createdAt -> set
+      if (t.createdAt) {
+        const createdKey = new Date(t.createdAt).toISOString().split('T')[0];
+        const idx = days.findIndex(dd => dd.key === createdKey);
+        if (idx >= 0) perDaySet[idx] += 1;
+      }
+
+      // completedAt/updatedAt -> achieved
+      if (t.completed) {
+        const completedTs = t.completedAt || t.updatedAt || null;
+        if (completedTs) {
+          const completedKey = new Date(completedTs).toISOString().split('T')[0];
+          const idx2 = days.findIndex(dd => dd.key === completedKey);
+          if (idx2 >= 0) perDayAchieved[idx2] += 1;
+        }
+      }
+    });
+
+    const maxCount = Math.max(...perDaySet, ...perDayAchieved, 1);
+
+    // Draw baseline gridlines
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i <= 4; i++) {
+      const y = padding + (chartHeight / 4) * i;
+      ctx.moveTo(padding, y);
+      ctx.lineTo(padding + chartWidth, y);
+    }
+    ctx.stroke();
+
+    // Draw lines for 'set' and 'achieved'
+    const slotWidth = chartWidth / (days.length - 1);
+
+    // Draw 'set' line (left color)
+    ctx.strokeStyle = 'rgba(255, 159, 67, 0.95)'; // orange
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    perDaySet.forEach((val, i) => {
+      const x = padding + slotWidth * i;
+      const y = padding + chartHeight - (val / maxCount) * chartHeight;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Draw 'achieved' line (blue)
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.98)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    perDayAchieved.forEach((val, i) => {
+      const x = padding + slotWidth * i;
+      const y = padding + chartHeight - (val / maxCount) * chartHeight;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Draw points and labels
+    perDaySet.forEach((val, i) => {
+      const x = padding + slotWidth * i;
+      const ySet = padding + chartHeight - (val / maxCount) * chartHeight;
+      const valA = perDayAchieved[i];
+      const yAch = padding + chartHeight - (valA / maxCount) * chartHeight;
+
+      // set point
+      ctx.fillStyle = 'rgba(255, 159, 67, 0.95)';
+      ctx.beginPath(); ctx.arc(x, ySet, 3, 0, Math.PI * 2); ctx.fill();
+
+      // achieved point
+      ctx.fillStyle = 'rgba(99, 102, 241, 0.98)';
+      ctx.beginPath(); ctx.arc(x, yAch, 3, 0, Math.PI * 2); ctx.fill();
+
+      // weekday label
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.font = '12px Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(days[i].label, x, padding + chartHeight + 14);
+    });
+
+    // Legend
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.font = '12px Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+    ctx.fillRect(padding, 6, 12, 8);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText('Tasks Set', padding + 18, 14);
+
+    ctx.fillStyle = 'rgba(99, 102, 241, 0.98)';
+    ctx.fillRect(padding + 120, 6, 12, 8);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText('Tasks Achieved', padding + 140, 14);
+
+    // Store chart data for tooltip interaction
+    const points = days.map((d, i) => ({
+      x: padding + slotWidth * i,
+      set: perDaySet[i],
+      achieved: perDayAchieved[i],
+      label: d.label
+    }));
+    this._lastChartData = { points, padding, chartWidth, chartHeight };
+    this._attachChartPointerHandlers();
+  }
+
+  _attachChartPointerHandlers() {
+    const canvas = document.querySelector('#weekly-progress-canvas');
+    const tooltip = document.querySelector('#weekly-chart-tooltip');
+    if (!canvas || !tooltip) return;
+    if (this._chartHandlersAttached) return;
+    this._chartHandlersAttached = true;
+
+    const getLocal = (evt) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (evt.touches ? evt.touches[0].clientX : evt.clientX) - rect.left;
+      const y = (evt.touches ? evt.touches[0].clientY : evt.clientY) - rect.top;
+      return { x, y, rect };
+    };
+
+    const showTooltip = (evt) => {
+      if (!this._lastChartData) return;
+      const { x, y, rect } = getLocal(evt);
+      const { days, padding, chartWidth, slotWidth } = this._lastChartData;
+      const relX = x - padding;
+      if (relX < 0 || relX > chartWidth) { tooltip.style.display = 'none'; return; }
+      const idx = Math.floor(relX / slotWidth);
+      const clamped = Math.max(0, Math.min(days.length - 1, idx));
+      const d = days[clamped];
+      if (!d) { tooltip.style.display = 'none'; return; }
+
+      const goalPerDay = (stateManager.getState('capSettings')?.durationCap || stateManager.getState('settings')?.durationCap || 40) / 7;
+      tooltip.style.display = 'block';
+      tooltip.textContent = `${d.label}: ${d.hours.toFixed(1)}h / ${goalPerDay.toFixed(1)}h`;
+      const left = Math.min(rect.width - 140, Math.max(8, x + 8));
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = Math.max(8, y + 8) + 'px';
+    };
+
+    const hideTooltip = () => { tooltip.style.display = 'none'; };
+
+    canvas.addEventListener('mousemove', showTooltip);
+    canvas.addEventListener('touchstart', showTooltip);
+    canvas.addEventListener('touchmove', showTooltip);
+    canvas.addEventListener('mouseleave', hideTooltip);
+    canvas.addEventListener('touchend', hideTooltip);
+  }
+
+  /**
+   * Setup responsive behavior for charts (resize canvas on window resize)
+   */
+  setupChartResize() {
+    if (this._chartResizeAttached) return;
+    this._chartResizeAttached = true;
+
+    const debounce = (fn, wait = 120) => {
+      let t = null;
+      return function(...args) {
+        if (t) clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, args), wait);
+      };
+    };
+
+    const handler = debounce(() => {
+      this.renderWeeklyChart();
+    }, 120);
+
+    window.addEventListener('resize', handler);
+    // Also re-render once when visibility changes (e.g., navigating to dashboard)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') this.renderWeeklyChart();
+    });
   }
   
   /**
@@ -1484,7 +1744,8 @@ class UIManager {
       if (task) {
         // Populate form
         if (this.elements.taskTitle) this.elements.taskTitle.value = task.title;
-        if (this.elements.taskDueDate) this.elements.taskDueDate.value = task.dueDate;
+  if (this.elements.taskDueDate) this.elements.taskDueDate.value = task.dueDate ? String(task.dueDate).split('T')[0] : '';
+  if (this.elements.taskDueTime) this.elements.taskDueTime.value = task.dueDate && String(task.dueDate).includes('T') ? String(task.dueDate).split('T')[1].slice(0,5) : '';
         if (this.elements.taskDuration) this.elements.taskDuration.value = task.duration;
         if (this.elements.taskTag) this.elements.taskTag.value = task.tag;
         if (this.elements.taskDescription) this.elements.taskDescription.value = task.description || '';

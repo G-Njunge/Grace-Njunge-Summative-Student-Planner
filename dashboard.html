@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orderly • Dashboard</title>
+    <meta name="description" content="Orderly dashboard and task manager">
+    <link rel="preload" href="styles/main.css" as="style">
+    <link rel="modulepreload" href="scripts/main.js">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <style>
+      /* Ensure the app is the primary section on this page */
+      .section { display: none; }
+      #app.section { display: block; }
+      
+      /* Apply homepage dark background to dashboard */
+      body, .main, #app {
+        background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: var(--white);
+      }
+
+      /* Make sections inside #app transparent so the dark bg shows through */
+      #app .section {
+        background: transparent;
+        padding: var(--space-12) 0;
+      }
+
+      /* Use glass-effect appearance on dashboard cards instead of white backgrounds */
+      #app .glass-effect {
+        /* slightly more opaque glass for improved contrast */
+        background: rgba(255,255,255,0.14);
+        border: 1px solid rgba(255,255,255,0.18);
+        box-shadow: 0 12px 36px rgba(0,0,0,0.45);
+        color: var(--white);
+      }
+
+      /* Header should remain dark on the dashboard even when JS adds .light */
+      .header.light .nav-container {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+      }
+
+      .header.light .nav-link,
+      .header.light .tagline,
+      .header.light .logo h1,
+      .header.light .hamburger {
+        color: var(--white) !important;
+      }
+      
+      /* Make stat cards pop more */
+      #app .stat-card {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: 0 14px 48px rgba(0,0,0,0.5);
+        color: var(--white);
+      }
+      
+      #app .stat-content h3 {
+        color: rgba(255,255,255,0.85);
+      }
+      
+      #app .stat-number {
+        color: var(--white);
+      }
+      
+      /* Make dashboard title and labels clearly visible */
+      #app .section-title {
+        color: var(--white);
+        text-shadow: 0 4px 18px rgba(0,0,0,0.6);
+      }
+
+      /* Cap/target label and input contrast */
+      .cap-label {
+        color: rgba(255,255,255,0.9);
+      }
+
+      .cap-input {
+        background: rgba(255,255,255,0.95);
+        color: var(--gray-900);
+        border: 1px solid rgba(0,0,0,0.12);
+      }
+      
+      /* Weekly goal: make it stand out */
+      #app .cap-section {
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+        border: 1px solid rgba(255,255,255,0.14);
+        padding: var(--space-6);
+        border-radius: var(--radius-xl);
+        margin-bottom: var(--space-6);
+      }
+
+      #app .cap-section h3 {
+        color: var(--white);
+        margin-bottom: var(--space-3);
+      }
+
+      /* Recent tasks preview clarity */
+      #app .recent-tasks {
+        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+        border: 1px solid rgba(255,255,255,0.12);
+        padding: var(--space-6);
+        border-radius: var(--radius-xl);
+      }
+
+      .tasks-preview {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+
+      .task-preview-item {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-md);
+        color: var(--white);
+      }
+
+      .task-preview-title {
+        color: var(--white);
+        font-weight: 600;
+      }
+
+      .task-preview-meta {
+        color: rgba(255,255,255,0.75);
+      }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header class="header" role="banner">
+      <nav class="nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+          <div class="logo">
+            <div class="logo-icon">📚</div>
+            <div>
+              <h1 id="logo-text">Orderly</h1>
+              <span class="tagline"></span>
+            </div>
+          </div>
+          <ul class="nav-menu" role="menubar">
+            <li role="none"><a href="index.html#hero" role="menuitem" class="nav-link">Home</a></li>
+            <li role="none"><a href="#dashboard" role="menuitem" class="nav-link">Dashboard</a></li>
+            <li role="none"><a href="tasks.html#tasks" role="menuitem" class="nav-link">Tasks</a></li>
+            <li role="none"><a href="tasks.html#add-task" role="menuitem" class="nav-link">Add Task</a></li>
+            <li role="none"><a href="#settings" role="menuitem" class="nav-link">Settings</a></li>
+            <li role="none"><a href="#about" role="menuitem" class="nav-link">About</a></li>
+            <li role="none"><a href="tests.html" role="menuitem" class="nav-link">Tests</a></li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content" class="main" role="main">
+      <section id="app" class="section active">
+        <section id="dashboard" class="app-section" aria-labelledby="dashboard-heading">
+          <div class="container">
+            <h2 id="dashboard-heading" class="section-title">Dashboard</h2>
+            <div class="stats-grid">
+              <div class="stat-card glass-effect">
+                <div class="stat-icon">📚</div>
+                <div class="stat-content">
+                  <h3>Total Tasks</h3>
+                  <p class="stat-number" id="total-tasks">0</p>
+                </div>
+              </div>
+              <div class="stat-card glass-effect">
+                <div class="stat-icon">⏰</div>
+                <div class="stat-content">
+                  <h3>Total Duration</h3>
+                  <p class="stat-number" id="total-duration">0h 0m</p>
+                </div>
+              </div>
+              <div class="stat-card glass-effect">
+                <div class="stat-icon">🏷️</div>
+                <div class="stat-content">
+                  <h3>Top Tag</h3>
+                  <p class="stat-number" id="top-tag">-</p>
+                </div>
+              </div>
+              <div class="stat-card glass-effect">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                  <h3>This Week</h3>
+                  <p class="stat-number" id="week-tasks">0</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="cap-section glass-effect">
+              <h3>Weekly Goal</h3>
+              <div class="cap-controls">
+                <label for="duration-cap" class="cap-label">Set weekly duration target (hours):</label>
+                <input type="number" id="duration-cap" class="cap-input" min="0" step="0.5" value="40">
+                <button id="update-cap" class="btn btn-primary">Update</button>
+              </div>
+              <div id="cap-status" class="cap-status" role="status" aria-live="polite"></div>
+            </div>
+
+            <div class="recent-tasks glass-effect">
+              <h3>Recent Tasks</h3>
+              <div id="recent-tasks-list" class="tasks-preview"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="tasks" class="section" aria-labelledby="tasks-heading">
+          <div class="container">
+            <h2 id="tasks-heading" class="section-title">Your Tasks</h2>
+            <div class="controls glass-effect">
+              <div class="search-container">
+                <label for="search-input" class="search-label">Search Tasks:</label>
+                <input type="text" id="search-input" class="search-input" placeholder="Enter search pattern...">
+                <div class="search-options">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="case-sensitive" class="checkbox">
+                    Case sensitive
+                  </label>
+                  <button id="clear-search" class="btn btn-secondary">Clear</button>
+                </div>
+              </div>
+              <div class="filter-controls">
+                <label for="sort-select" class="filter-label">Sort by:</label>
+                <select id="sort-select" class="select">
+                  <option value="date-desc">Date (Newest First)</option>
+                  <option value="date-asc">Date (Oldest First)</option>
+                  <option value="title-asc">Title (A-Z)</option>
+                  <option value="title-desc">Title (Z-A)</option>
+                  <option value="duration-desc">Duration (Longest First)</option>
+                  <option value="duration-asc">Duration (Shortest First)</option>
+                  <option value="tag-asc">Tag (A-Z)</option>
+                </select>
+                <label for="tag-filter" class="filter-label">Filter by tag:</label>
+                <select id="tag-filter" class="select">
+                  <option value="">All Tags</option>
+                </select>
+              </div>
+            </div>
+            <div class="tasks-container">
+              <div id="tasks-loading" class="loading" aria-live="polite">Loading tasks...</div>
+              <div id="tasks-empty" class="empty-state" style="display: none;">
+                <div class="empty-icon">📝</div>
+                <h3>No tasks found</h3>
+                <p>Start by adding your first task or adjust your search criteria.</p>
+                <a href="tasks.html#add-task" class="btn btn-primary">Add Task</a>
+              </div>
+              <div id="tasks-grid" class="tasks-grid"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Add Task moved to tasks.html -->
+
+        <section id="settings" class="section" aria-labelledby="settings-heading">
+          <div class="container">
+            <h2 id="settings-heading" class="section-title">Settings</h2>
+            <div class="settings-grid">
+              <div class="settings-card glass-effect">
+                <h3>Data Management</h3>
+                <div class="settings-group">
+                  <label for="backup-data" class="settings-label">Backup Data</label>
+                  <button id="backup-data" class="btn btn-primary">Create Backup</button>
+                  <p class="settings-description">Save your tasks to your device</p>
+                </div>
+                <div class="settings-group">
+                  <label for="restore-data" class="settings-label">Restore Data</label>
+                  <input type="file" id="restore-data" accept=".txt" class="file-input">
+                  <p class="settings-description">Restore your tasks from a backup file</p>
+                </div>
+                <div class="settings-group">
+                  <label class="settings-label">Clear All Data</label>
+                  <button id="clear-data" class="btn btn-danger">Clear All Tasks</button>
+                  <p class="settings-description">⚠️ This action cannot be undone</p>
+                </div>
+              </div>
+              <div class="settings-card glass-effect">
+                <h3>Units & Display</h3>
+                <div class="settings-group">
+                  <label for="time-unit" class="settings-label">Default Time Unit</label>
+                  <select id="time-unit" class="select">
+                    <option value="hours">Hours</option>
+                    <option value="minutes">Minutes</option>
+                  </select>
+                  <p class="settings-description">Choose how duration is displayed</p>
+                </div>
+                <div class="settings-group">
+                  <label for="date-format" class="settings-label">Date Format</label>
+                  <select id="date-format" class="select">
+                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                  </select>
+                </div>
+              </div>
+              <div class="settings-card glass-effect">
+                <h3>Notifications</h3>
+                <div class="settings-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="due-reminders" class="checkbox">
+                    Due date reminders
+                  </label>
+                  <p class="settings-description">Get notified about upcoming deadlines</p>
+                </div>
+                <div class="settings-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="goal-alerts" class="checkbox">
+                    Goal achievement alerts
+                  </label>
+                  <p class="settings-description">Celebrate when you reach your weekly goals</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="about" class="section" aria-labelledby="about-heading">
+          <div class="container">
+            <h2 id="about-heading" class="section-title">About Campus Life Planner</h2>
+            <div class="about-content glass-effect">
+              <div class="about-hero">
+                <h3>Your Academic Journey Companion</h3>
+                <p>Campus Life Planner helps you organize your academic tasks, track your progress, and stay on top of your deadlines. Built with accessibility and usability in mind, this tool empowers students to take control of their academic life.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="footer" role="contentinfo">
+      <div class="container">
+        <div class="footer-content">
+          <p>&copy; 2024 Campus Life Planner. Built with ❤️ for students everywhere.</p>
+          <div class="footer-links">
+            <a href="#about">About</a>
+            <a href="#settings">Settings</a>
+            <a href="https://github.com/your-username" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <div id="confirm-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content glass-effect">
+        <h3 id="modal-title">Confirm Action</h3>
+        <p id="modal-message">Are you sure you want to proceed?</p>
+        <div class="modal-actions">
+          <button id="modal-confirm" class="btn btn-primary">Confirm</button>
+          <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="scripts/main.js"></script>
+</body>
+</html>
+

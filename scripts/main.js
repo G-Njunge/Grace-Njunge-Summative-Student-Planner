@@ -5,9 +5,9 @@
  * This module initializes the application and coordinates all modules
  */
 
-import { initializeState, stateManager, uiActions } from '../../scripts/state.js';
-import { initializeUI, uiManager } from '../../scripts/ui.js';
-import { searchManager } from '../../scripts/search.js';
+import { initializeState, stateManager, uiActions } from './state.js';
+import { initializeUI, uiManager } from './ui.js';
+import { searchManager } from './search.js';
 
 /**
  * Application class
@@ -477,7 +477,7 @@ window.addEventListener('beforeunload', (e) => {
   const tasks = stateManager.getState('tasks');
   if (tasks.length > 0) {
     // Import save function dynamically to avoid circular dependency
-    import('../../scripts/storage.js').then(({ saveTasks }) => {
+    import('./storage.js').then(({ saveTasks }) => {
       saveTasks(tasks);
     });
   }

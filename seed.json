@@ -1,0 +1,202 @@
+[
+  {
+    "id": "task_001",
+    "title": "Complete Calculus Assignment",
+    "dueDate": "2024-12-20",
+    "duration": 3.5,
+    "tag": "Homework",
+    "description": "Finish all problems from chapters 8-10, including derivatives and integrals",
+    "createdAt": "2024-12-15T10:30:00.000Z",
+    "updatedAt": "2024-12-15T10:30:00.000Z"
+  },
+  {
+    "id": "task_002",
+    "title": "Research Paper on Climate Change",
+    "dueDate": "2024-12-28",
+    "duration": 8.0,
+    "tag": "Research",
+    "description": "Write a 2000-word research paper analyzing the impact of climate change on coastal cities. Include at least 5 peer-reviewed sources.",
+    "createdAt": "2024-12-10T14:15:00.000Z",
+    "updatedAt": "2024-12-10T14:15:00.000Z"
+  },
+  {
+    "id": "task_003",
+    "title": "Prepare for Physics Midterm",
+    "dueDate": "2024-12-22",
+    "duration": 4.0,
+    "tag": "Exam",
+    "description": "Review thermodynamics and quantum mechanics concepts. Practice problems from textbook chapters 15-18.",
+    "createdAt": "2024-12-12T09:45:00.000Z",
+    "updatedAt": "2024-12-12T09:45:00.000Z"
+  },
+  {
+    "id": "task_004",
+    "title": "Group Project Presentation",
+    "dueDate": "2024-12-18",
+    "duration": 2.5,
+    "tag": "Presentation",
+    "description": "Final presentation for marketing strategy project. Prepare slides and practice delivery with team members.",
+    "createdAt": "2024-12-08T16:20:00.000Z",
+    "updatedAt": "2024-12-08T16:20:00.000Z"
+  },
+  {
+    "id": "task_005",
+    "title": "Lab Report - Chemistry Experiment",
+    "dueDate": "2024-12-16",
+    "duration": 1.5,
+    "tag": "Lab",
+    "description": "Write up results from last week's organic chemistry synthesis experiment. Include data analysis and conclusions.",
+    "createdAt": "2024-12-14T11:30:00.000Z",
+    "updatedAt": "2024-12-14T11:30:00.000Z"
+  },
+  {
+    "id": "task_006",
+    "title": "Study for History Final",
+    "dueDate": "2024-12-30",
+    "duration": 6.0,
+    "tag": "Exam",
+    "description": "Comprehensive review of World War II and Cold War eras. Create timeline and study flashcards.",
+    "createdAt": "2024-12-05T13:00:00.000Z",
+    "updatedAt": "2024-12-05T13:00:00.000Z"
+  },
+  {
+    "id": "task_007",
+    "title": "Code Review for Software Project",
+    "dueDate": "2024-12-19",
+    "duration": 2.0,
+    "tag": "Programming",
+    "description": "Review team member's code for the web application project. Provide feedback and suggestions for improvements.",
+    "createdAt": "2024-12-11T15:45:00.000Z",
+    "updatedAt": "2024-12-11T15:45:00.000Z"
+  },
+  {
+    "id": "task_008",
+    "title": "Art Portfolio Submission",
+    "dueDate": "2024-12-25",
+    "duration": 5.0,
+    "tag": "Creative",
+    "description": "Complete final pieces for digital art portfolio. Edit and organize all work for submission to art program.",
+    "createdAt": "2024-12-06T10:15:00.000Z",
+    "updatedAt": "2024-12-06T10:15:00.000Z"
+  },
+  {
+    "id": "task_009",
+    "title": "Statistics Problem Set",
+    "dueDate": "2024-12-17",
+    "duration": 2.5,
+    "tag": "Homework",
+    "description": "Complete problems 1-15 on hypothesis testing and confidence intervals. Show all work clearly.",
+    "createdAt": "2024-12-13T12:00:00.000Z",
+    "updatedAt": "2024-12-13T12:00:00.000Z"
+  },
+  {
+    "id": "task_010",
+    "title": "Literature Essay - Shakespeare",
+    "dueDate": "2024-12-23",
+    "duration": 4.5,
+    "tag": "Essay",
+    "description": "Analyze the theme of revenge in Hamlet. Compare with modern interpretations and provide critical analysis.",
+    "createdAt": "2024-12-09T14:30:00.000Z",
+    "updatedAt": "2024-12-09T14:30:00.000Z"
+  },
+  {
+    "id": "task_011",
+    "title": "Biology Lab Practical",
+    "dueDate": "2024-12-21",
+    "duration": 1.0,
+    "tag": "Lab",
+    "description": "Identify 20 different plant and animal specimens under microscope. Prepare identification notes.",
+    "createdAt": "2024-12-07T08:45:00.000Z",
+    "updatedAt": "2024-12-07T08:45:00.000Z"
+  },
+  {
+    "id": "task_012",
+    "title": "Economics Case Study",
+    "dueDate": "2024-12-26",
+    "duration": 3.0,
+    "tag": "Case-Study",
+    "description": "Analyze the 2008 financial crisis using economic theories learned in class. Include graphs and data visualization.",
+    "createdAt": "2024-12-04T16:10:00.000Z",
+    "updatedAt": "2024-12-04T16:10:00.000Z"
+  },
+  {
+    "id": "task_013",
+    "title": "Spanish Conversation Practice",
+    "dueDate": "2024-12-24",
+    "duration": 1.5,
+    "tag": "Language",
+    "description": "Practice speaking with language partner for 1.5 hours. Focus on past tense and subjunctive mood.",
+    "createdAt": "2024-12-03T19:20:00.000Z",
+    "updatedAt": "2024-12-03T19:20:00.000Z"
+  },
+  {
+    "id": "task_014",
+    "title": "Psychology Research Proposal",
+    "dueDate": "2024-12-27",
+    "duration": 6.5,
+    "tag": "Research",
+    "description": "Write research proposal for senior thesis on cognitive behavioral therapy effectiveness. Include methodology and literature review.",
+    "createdAt": "2024-12-02T11:15:00.000Z",
+    "updatedAt": "2024-12-02T11:15:00.000Z"
+  },
+  {
+    "id": "task_015",
+    "title": "Philosophy Reading Assignment",
+    "dueDate": "2024-12-29",
+    "duration": 3.5,
+    "tag": "Reading",
+    "description": "Read Kant's Critique of Pure Reason chapters 1-3. Prepare discussion questions for seminar.",
+    "createdAt": "2024-12-01T15:30:00.000Z",
+    "updatedAt": "2024-12-01T15:30:00.000Z"
+  },
+  {
+    "id": "task_016",
+    "title": "Music Theory Analysis",
+    "dueDate": "2024-12-31",
+    "duration": 2.0,
+    "tag": "Music",
+    "description": "Analyze harmonic progression in Bach's Brandenburg Concerto No. 3. Transcribe and identify chord functions.",
+    "createdAt": "2024-11-30T13:45:00.000Z",
+    "updatedAt": "2024-11-30T13:45:00.000Z"
+  },
+  {
+    "id": "task_017",
+    "title": "Political Science Debate Prep",
+    "dueDate": "2025-01-02",
+    "duration": 4.0,
+    "tag": "Debate",
+    "description": "Prepare arguments for and against universal basic income. Research statistics and case studies from different countries.",
+    "createdAt": "2024-11-29T10:00:00.000Z",
+    "updatedAt": "2024-11-29T10:00:00.000Z"
+  },
+  {
+    "id": "task_018",
+    "title": "Architecture Design Project",
+    "dueDate": "2025-01-05",
+    "duration": 12.0,
+    "tag": "Design",
+    "description": "Design sustainable housing complex for urban environment. Create 3D models and present to class.",
+    "createdAt": "2024-11-28T14:20:00.000Z",
+    "updatedAt": "2024-11-28T14:20:00.000Z"
+  },
+  {
+    "id": "task_019",
+    "title": "Sociology Survey Analysis",
+    "dueDate": "2025-01-03",
+    "duration": 3.5,
+    "tag": "Analysis",
+    "description": "Analyze survey data on social media usage patterns among college students. Create charts and write findings report.",
+    "createdAt": "2024-11-27T16:35:00.000Z",
+    "updatedAt": "2024-11-27T16:35:00.000Z"
+  },
+  {
+    "id": "task_020",
+    "title": "Geology Field Trip Report",
+    "dueDate": "2025-01-04",
+    "duration": 2.5,
+    "tag": "Field-Work",
+    "description": "Document geological formations observed during field trip to local mountains. Include photos and rock samples analysis.",
+    "createdAt": "2024-11-26T12:10:00.000Z",
+    "updatedAt": "2024-11-26T12:10:00.000Z"
+  }
+]

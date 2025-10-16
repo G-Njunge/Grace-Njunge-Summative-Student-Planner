@@ -1,7 +1,7 @@
 // Test runner module for Campus-Life
 // This file contains the same test harness that was previously embedded in tests.html
 
-import { validateField, validateTask, compileRegex, testRegex, ADVANCED_PATTERNS } from '../../scripts/validators.js';
+import { validateField, validateTask, compileRegex, testRegex, ADVANCED_PATTERNS } from './validators.js';
 import { generateId, generateTimestamp, loadTasks, saveTasks, exportData, importData } from './storage.js';
 import { searchManager, filterTasks, sortTasks } from './search.js';
 

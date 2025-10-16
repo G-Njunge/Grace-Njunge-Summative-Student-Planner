@@ -4,7 +4,7 @@
  */
 
 import { generateId, generateTimestamp, loadTasks, saveTasks, loadSettings, saveSettings } from './storage.js';
-import { validateTask } from '../../scripts/validators.js';
+import { validateTask } from './validators.js';
 
 /**
  * Application state structure

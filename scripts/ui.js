@@ -5,7 +5,7 @@
 
 import { stateManager, taskActions, uiActions, settingsActions } from './state.js';
 import { searchManager, filterTasks, sortTasks } from './search.js';
-import { validateField } from '../../scripts/validators.js';
+import { validateField } from './validators.js';
 
 /**
  * DOM element selectors
@@ -41,6 +41,7 @@ const SELECTORS = {
   completedTasks: '#completed-tasks',
   capStatus: '#cap-status',
   recentTasksList: '#recent-tasks-list',
+  todaysTasksList: '#todays-tasks-list',
   capInput: '#duration-cap',
   updateCapBtn: '#update-cap',
   
@@ -307,6 +308,19 @@ class UIManager {
         }
       });
     }
+
+    // Toggle recent tasks collapse
+    const toggleRecent = document.getElementById('toggle-recent');
+    if (toggleRecent) {
+      toggleRecent.addEventListener('click', (e) => {
+        const panel = document.querySelector('.recent-tasks');
+        if (!panel) return;
+        const isCollapsed = panel.classList.toggle('collapsed');
+        toggleRecent.setAttribute('aria-pressed', String(isCollapsed));
+        toggleRecent.textContent = isCollapsed ? 'Show' : 'Hide';
+        toggleRecent.title = isCollapsed ? 'Show recent tasks' : 'Hide recent tasks';
+      });
+    }
   }
 
   /**
@@ -538,6 +552,7 @@ class UIManager {
       this.renderTasks();
       this.updateDashboard();
       this.updateTagFilter();
+      this.renderTodaysTasks();
     });
     
     stateManager.subscribe('currentSection', (section) => {
@@ -551,6 +566,7 @@ class UIManager {
     
     stateManager.subscribe('stats', (stats) => {
       this.updateDashboard();
+      this.renderTodaysTasks();
     });
     
     // capSettings and homepage-only widgets removed from index.html
@@ -1310,6 +1326,61 @@ class UIManager {
         </div>
       `).join('');
     }
+    // Also update Today's tasks if present
+    this.renderTodaysTasks();
+  }
+
+  /**
+   * Render Today's Tasks panel: tasks due today, sorted by duration desc
+   */
+  renderTodaysTasks() {
+    const container = document.getElementById('todays-tasks-list');
+    if (!container) return;
+
+    const tasks = stateManager.getState('tasks') || [];
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Filter tasks due today and not deleted
+    const todays = tasks.filter(t => t.dueDate && String(t.dueDate).startsWith(todayStr));
+
+    // Sort by duration descending (longest first)
+    todays.sort((a, b) => parseFloat(b.duration || 0) - parseFloat(a.duration || 0));
+
+    if (todays.length === 0) {
+      container.innerHTML = '<div class="empty-state" style="padding:12px;color:var(--gray-300)">No tasks for today</div>';
+      return;
+    }
+
+    container.innerHTML = todays.map(task => {
+      const due = task.dueDate ? new Date(task.dueDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-';
+      const durationVal = parseFloat(task.duration || 0);
+      const duration = task.duration ? `${durationVal} h` : '-';
+      const longAttr = durationVal >= 2 ? 'data-duration-long="true"' : '';
+      return `
+        <div class="task-preview-item todays-task" data-task-id="${task.id}" ${longAttr}>
+          <div style="display:flex;align-items:center;gap:12px;flex:1">
+            <label style="display:flex;align-items:center;gap:8px;color:var(--white);">
+              <input type="checkbox" class="todays-task-complete" data-task-id="${task.id}" ${task.completed ? 'checked' : ''}>
+            </label>
+            <div style="flex:1">
+              <div class="task-preview-title">${this.escapeHtml(task.title)}</div>
+              <div class="task-preview-meta">Tag: ${this.escapeHtml(task.tag || '-') } • Due: ${due} • ${duration}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Bind completion toggles
+    container.querySelectorAll('.todays-task-complete').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const taskId = e.target.dataset.taskId;
+        const checked = e.target.checked;
+        const task = stateManager.getState('tasks').find(t => t.id === taskId) || { id: taskId, title: '' };
+        taskActions.updateTask(taskId, { completed: checked }, stateManager);
+        if (checked) this.showUndoToast(task);
+      });
+    });
   }
   
   /**

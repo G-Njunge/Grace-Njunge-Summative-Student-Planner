@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orderly • Tasks</title>
+  <link rel="preload" href="styles/main.css" as="style">
+  <link rel="modulepreload" href="scripts/main.js">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/responsive.css">
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="header" role="banner">
+    <nav class="nav" role="navigation" aria-label="Main navigation">
+      <div class="nav-container">
+        <div class="logo">
+          <div class="logo-icon">📚</div>
+          <div>
+            <h1 id="logo-text">Orderly</h1>
+            <span class="tagline"></span>
+          </div>
+        </div>
+        <ul class="nav-menu" role="menubar">
+          <li role="none"><a href="index.html#hero" role="menuitem" class="nav-link">Home</a></li>
+          <li role="none"><a href="dashboard.html#dashboard" role="menuitem" class="nav-link">Dashboard</a></li>
+          <li role="none"><a href="tasks.html#tasks" role="menuitem" class="nav-link">Tasks</a></li>
+          <li role="none"><a href="tasks.html#add-task" role="menuitem" class="nav-link">Add Task</a></li>
+          <li role="none"><a href="dashboard.html#settings" role="menuitem" class="nav-link">Settings</a></li>
+          <li role="none"><a href="dashboard.html#about" role="menuitem" class="nav-link">About</a></li>
+          <li role="none"><a href="tests.html" role="menuitem" class="nav-link">Tests</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content" class="main" role="main">
+
+  <section id="tasks" class="section active">
+      <div class="container">
+        <h2 id="tasks-heading" class="section-title">Your Tasks</h2>
+        <div class="controls glass-effect">
+          <div class="search-container">
+            <label for="search-input" class="search-label">Search Tasks:</label>
+            <input type="text" id="search-input" class="search-input" placeholder="Enter search pattern...">
+            <button id="search-btn" type="button" class="btn btn-primary">Search</button>
+            <div id="search-results" class="search-results" aria-live="polite" style="margin-left:12px;color:var(--muted);">&nbsp;</div>
+            <div id="search-results-list" class="search-results-list" style="margin-top:12px;"></div>
+            <div class="search-options">
+              <label class="checkbox-label">
+                <input type="checkbox" id="case-sensitive" class="checkbox">
+                Case sensitive
+              </label>
+              <button id="clear-search" class="btn btn-secondary">Clear</button>
+            </div>
+          </div>
+          <div class="filter-controls">
+            <label for="sort-select" class="filter-label">Sort by:</label>
+            <select id="sort-select" class="select">
+              <option value="date-desc">Date (Newest First)</option>
+              <option value="date-asc">Date (Oldest First)</option>
+              <option value="title-asc">Title (A-Z)</option>
+              <option value="title-desc">Title (Z-A)</option>
+              <option value="duration-desc">Duration (Longest First)</option>
+              <option value="duration-asc">Duration (Shortest First)</option>
+              <option value="tag-asc">Tag (A-Z)</option>
+            </select>
+            <label for="tag-filter" class="filter-label">Filter by tag:</label>
+            <select id="tag-filter" class="select">
+              <option value="">All Tags</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tasks-container">
+          <div id="tasks-loading" class="loading" aria-live="polite">Loading tasks...</div>
+          <div id="tasks-empty" class="empty-state" style="display: none;">
+            <div class="empty-icon">📝</div>
+            <h3>No tasks found</h3>
+            <p>Start by adding your first task or adjust your search criteria.</p>
+            <a href="tasks.html#add-task" class="btn btn-primary">Add Task</a>
+          </div>
+          <div id="tasks-grid" class="tasks-grid"></div>
+        </div>
+
+        <div id="add-task" class="add-task-container">
+          <h3 class="section-title">Add New Task</h3>
+          <form id="task-form" class="task-form glass-effect" novalidate>
+            <div class="form-group">
+              <label for="task-title" class="form-label">Task Title *</label>
+              <input type="text" id="task-title" class="form-input" required placeholder="e.g., Complete Math Assignment">
+              <div class="error-message" id="title-error" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="task-due-date" class="form-label">Due Date *</label>
+              <input type="date" id="task-due-date" class="form-input" required>
+              <div class="error-message" id="date-error" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="task-duration" class="form-label">Estimated Duration (hours) *</label>
+              <input type="number" id="task-duration" class="form-input" required min="0" step="0.25" placeholder="2.5">
+              <div class="error-message" id="duration-error" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="task-tag" class="form-label">Tag *</label>
+              <input type="text" id="task-tag" class="form-input" required placeholder="e.g., Homework, Project, Exam">
+              <div class="error-message" id="tag-error" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="task-description" class="form-label">Description (Optional)</label>
+              <textarea id="task-description" class="form-textarea" rows="4" placeholder="Additional details about this task..."></textarea>
+              <div class="error-message" id="description-error" role="alert"></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Save Task</button>
+              <button type="button" id="cancel-edit" class="btn btn-secondary" style="display: none;">Cancel Edit</button>
+              <button type="reset" class="btn btn-outline">Reset Form</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-content">
+        <p>&copy; 2024 Campus Life Planner. Built with ❤️ for students everywhere.</p>
+        <div class="footer-links">
+          <a href="dashboard.html#about">About</a>
+          <a href="dashboard.html#settings">Settings</a>
+          <a href="https://github.com/your-username" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="confirm-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content glass-effect">
+      <h3 id="modal-title">Confirm Action</h3>
+      <p id="modal-message">Are you sure you want to proceed?</p>
+      <div class="modal-actions">
+        <button id="modal-confirm" class="btn btn-primary">Confirm</button>
+        <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" style="position:fixed;bottom:20px;right:20px;z-index:2000"></div>
+
+  <script type="module" src="scripts/main.js"></script>
+</body>
+</html>

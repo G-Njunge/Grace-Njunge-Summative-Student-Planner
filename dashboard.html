@@ -191,6 +191,13 @@
                   <p class="stat-number" id="week-tasks">0</p>
                 </div>
               </div>
+              <div class="stat-card glass-effect">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                  <h3>Completed</h3>
+                  <p class="stat-number" id="completed-tasks">0</p>
+                </div>
+              </div>
             </div>
 
             <div class="cap-section glass-effect">
@@ -203,9 +210,11 @@
               <div id="cap-status" class="cap-status" role="status" aria-live="polite"></div>
             </div>
 
-            <div class="recent-tasks glass-effect">
-              <h3>Recent Tasks</h3>
-              <div id="recent-tasks-list" class="tasks-preview"></div>
+            
+            <!-- Today's Tasks: highest priority by duration -->
+            <div class="todays-tasks glass-effect">
+              <h3>Today's Tasks (Longest First)</h3>
+              <div id="todays-tasks-list" class="tasks-preview"></div>
             </div>
           </div>
         </section>

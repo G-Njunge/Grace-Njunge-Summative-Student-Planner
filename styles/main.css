@@ -1080,19 +1080,23 @@ html {
 .select {
   width: 100%;
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--gray-300);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
-  background: var(--white);
   transition: all var(--transition-fast);
+  /* Global dark glass style for inputs */
+  background: rgba(255,255,255,0.06);
+  color: var(--white);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(6px);
 }
 
 .form-input:focus,
 .form-textarea:focus,
 .select:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+  border-color: rgba(236,72,153,0.9);
+  box-shadow: 0 0 0 4px rgba(236,72,153,0.08);
   outline: none;
+  color: var(--white);
 }
 
 .form-textarea {

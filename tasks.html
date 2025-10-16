@@ -10,6 +10,26 @@
   <link rel="stylesheet" href="styles/components.css">
   <link rel="stylesheet" href="styles/responsive.css">
   <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  <style>
+    /* Ensure header contrast and section transparency to match dashboard theme */
+    body, .main, #tasks {
+      background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+      color: var(--white);
+      background-attachment: fixed;
+    }
+
+    /* Make glass-effect areas match dashboard (slightly more opaque) */
+    #tasks .glass-effect {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: var(--white);
+    }
+
+    /* Section titles and labels should be white on this page for contrast */
+    #tasks .section-title, #tasks .form-label, #tasks label {
+      color: var(--white) !important;
+    }
+  </style>
 </head>
 <body>
   <a href="#main-content" class="skip-link">Skip to main content</a>

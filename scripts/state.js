@@ -316,11 +316,28 @@ export const taskActions = {
       return false;
     }
     
+    const prevTask = tasks[taskIndex];
     const updatedTask = {
-      ...tasks[taskIndex],
+      ...prevTask,
       ...updates,
       updatedAt: generateTimestamp()
     };
+
+    // Manage completedAt timestamp: when a task is marked completed set completedAt, when unmarked clear it
+    if (Object.prototype.hasOwnProperty.call(updates, 'completed')) {
+      const wasCompleted = Boolean(prevTask.completed);
+      const willBeCompleted = Boolean(updates.completed);
+      if (!wasCompleted && willBeCompleted) {
+        updatedTask.completedAt = generateTimestamp();
+      } else if (wasCompleted && !willBeCompleted) {
+        updatedTask.completedAt = null;
+      }
+      // If updates.completed present but no change in boolean, keep existing completedAt
+      if (wasCompleted && willBeCompleted && !prevTask.completedAt) {
+        // fallback to updatedAt if previous completed flag existed but no timestamp
+        updatedTask.completedAt = updatedTask.updatedAt;
+      }
+    }
     
     // Validate updated task
     const validation = validateTask(updatedTask);
@@ -405,8 +422,8 @@ export const taskActions = {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     
-    // Calculate total duration
-    const totalDuration = tasks.reduce((sum, task) => sum + parseFloat(task.duration || 0), 0);
+  // Calculate total duration (planned/assigned)
+  const totalDuration = tasks.reduce((sum, task) => sum + parseFloat(task.duration || 0), 0);
     
     // Calculate tag frequency
     const tagCounts = {};
@@ -432,6 +449,20 @@ export const taskActions = {
     
   // Calculate completed tasks
   const completedTasks = tasks.filter(t => t.completed).length;
+
+  // Calculate completed duration for the past week (only completed tasks count toward the weekly goal)
+  const completedDurationWeek = tasks.reduce((sum, task) => {
+    if (!task.completed) return sum;
+
+    // Determine completion timestamp: prefer completedAt, fall back to updatedAt
+    const completedAt = task.completedAt ? new Date(task.completedAt) : (task.updatedAt ? new Date(task.updatedAt) : null);
+    if (!completedAt) return sum;
+
+    if (completedAt >= weekAgo && completedAt <= now) {
+      return sum + parseFloat(task.duration || 0);
+    }
+    return sum;
+  }, 0);
     
     const stats = {
       totalTasks: tasks.length,
@@ -439,14 +470,16 @@ export const taskActions = {
       topTag,
       weekTasks,
       overdueTasks,
-      completedTasks
+      completedTasks,
+      completedDurationWeek
     };
     console.debug('taskActions.calculateStats: computed', stats);
 
     stateManager.setState({ stats });
 
     // Update cap status
-    taskActions.updateCapStatus(stateManager, totalDuration);
+    // The cap/goal should be computed against completed hours in the current week
+    taskActions.updateCapStatus(stateManager, completedDurationWeek);
   },
   
   /**

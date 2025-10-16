@@ -40,7 +40,6 @@ const SELECTORS = {
   weekTasks: '#week-tasks',
   completedTasks: '#completed-tasks',
   capStatus: '#cap-status',
-  recentTasksList: '#recent-tasks-list',
   todaysTasksList: '#todays-tasks-list',
   capInput: '#duration-cap',
   updateCapBtn: '#update-cap',
@@ -81,6 +80,8 @@ class UIManager {
     this.isInitialized = false;
     this.currentSearchResults = [];
   }
+
+  // Recent dropdown removed — functionality consolidated into Today's Tasks list
   
   /**
    * Initialize UI manager
@@ -309,18 +310,7 @@ class UIManager {
       });
     }
 
-    // Toggle recent tasks collapse
-    const toggleRecent = document.getElementById('toggle-recent');
-    if (toggleRecent) {
-      toggleRecent.addEventListener('click', (e) => {
-        const panel = document.querySelector('.recent-tasks');
-        if (!panel) return;
-        const isCollapsed = panel.classList.toggle('collapsed');
-        toggleRecent.setAttribute('aria-pressed', String(isCollapsed));
-        toggleRecent.textContent = isCollapsed ? 'Show' : 'Hide';
-        toggleRecent.title = isCollapsed ? 'Show recent tasks' : 'Hide recent tasks';
-      });
-    }
+    // recent-tasks panel removed from dashboard; no action needed here
   }
 
   /**
@@ -523,6 +513,8 @@ class UIManager {
       }
     }
 
+    // Recent dropdown removed from dashboard; nothing to toggle here
+
     if (section) this.navigateToSection(section);
   }
 
@@ -595,6 +587,8 @@ class UIManager {
     stateManager.subscribe('capSettings', (capSettings) => {
       if (capSettings) this.updateCapStatus(capSettings);
     });
+
+    // Recent dropdown removed — no-op
   }
   
   /**
@@ -1314,18 +1308,6 @@ class UIManager {
     const recentTasks = tasks
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5);
-    
-    if (this.elements.recentTasksList) {
-      this.elements.recentTasksList.innerHTML = recentTasks.map(task => `
-        <div class="task-preview-item">
-          <span class="task-preview-title">${this.escapeHtml(task.title)}</span>
-          <div class="task-preview-meta">
-            <span>${task.tag}</span>
-            <span>${new Date(task.dueDate).toLocaleDateString()}</span>
-          </div>
-        </div>
-      `).join('');
-    }
     // Also update Today's tasks if present
     this.renderTodaysTasks();
   }
@@ -1351,25 +1333,28 @@ class UIManager {
       return;
     }
 
-    container.innerHTML = todays.map(task => {
+    // Build a semantic list
+    const listHtml = todays.map(task => {
       const due = task.dueDate ? new Date(task.dueDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-';
       const durationVal = parseFloat(task.duration || 0);
       const duration = task.duration ? `${durationVal} h` : '-';
       const longAttr = durationVal >= 2 ? 'data-duration-long="true"' : '';
+
       return `
-        <div class="task-preview-item todays-task" data-task-id="${task.id}" ${longAttr}>
-          <div style="display:flex;align-items:center;gap:12px;flex:1">
-            <label style="display:flex;align-items:center;gap:8px;color:var(--white);">
-              <input type="checkbox" class="todays-task-complete" data-task-id="${task.id}" ${task.completed ? 'checked' : ''}>
-            </label>
-            <div style="flex:1">
-              <div class="task-preview-title">${this.escapeHtml(task.title)}</div>
-              <div class="task-preview-meta">Tag: ${this.escapeHtml(task.tag || '-') } • Due: ${due} • ${duration}</div>
-            </div>
+        <li class="todays-list-item" data-task-id="${task.id}" ${longAttr}>
+          <label class="todays-checkbox">
+            <input type="checkbox" class="todays-task-complete" data-task-id="${task.id}" ${task.completed ? 'checked' : ''}>
+          </label>
+          <div class="todays-content">
+            <div class="task-preview-title">${this.escapeHtml(task.title)}</div>
+            <div class="task-preview-meta">Tag: ${this.escapeHtml(task.tag || '-') } • Due: ${due}</div>
           </div>
-        </div>
+          <div class="duration-badge">${this.escapeHtml(duration)}</div>
+        </li>
       `;
     }).join('');
+
+    container.innerHTML = `<ul class="todays-list">${listHtml}</ul>`;
 
     // Bind completion toggles
     container.querySelectorAll('.todays-task-complete').forEach(cb => {

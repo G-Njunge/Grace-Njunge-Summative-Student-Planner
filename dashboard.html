@@ -99,36 +99,7 @@
         margin-bottom: var(--space-3);
       }
 
-      /* Recent tasks preview clarity */
-      #app .recent-tasks {
-        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-        border: 1px solid rgba(255,255,255,0.12);
-        padding: var(--space-6);
-        border-radius: var(--radius-xl);
-      }
-
-      .tasks-preview {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3);
-      }
-
-      .task-preview-item {
-        background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.08);
-        padding: var(--space-3) var(--space-4);
-        border-radius: var(--radius-md);
-        color: var(--white);
-      }
-
-      .task-preview-title {
-        color: var(--white);
-        font-weight: 600;
-      }
-
-      .task-preview-meta {
-        color: rgba(255,255,255,0.75);
-      }
+      /* Recent tasks panel removed from dashboard; generic preview styles retained in main stylesheet */
     </style>
 </head>
 <body>
@@ -161,7 +132,12 @@
       <section id="app" class="section active">
         <section id="dashboard" class="app-section" aria-labelledby="dashboard-heading">
           <div class="container">
-            <h2 id="dashboard-heading" class="section-title">Dashboard</h2>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <h2 id="dashboard-heading" class="section-title">Dashboard</h2>
+              <div style="display:flex;gap:8px;align-items:center">
+                <!-- Recent tasks dropdown removed per user request -->
+              </div>
+            </div>
             <div class="stats-grid">
               <div class="stat-card glass-effect">
                 <div class="stat-icon">📚</div>

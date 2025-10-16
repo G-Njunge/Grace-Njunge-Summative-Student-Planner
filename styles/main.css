@@ -694,11 +694,7 @@ html {
   font-size: var(--font-size-sm);
   color: var(--gray-600);
 }
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-8);
-  margin-top: var(--space-12);
-}
+
 
 .step-card {
   text-align: center;
@@ -884,12 +880,7 @@ html {
 }
 
 /* ===== RECENT TASKS ===== */
-.recent-tasks h3 {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  color: var(--gray-900);
-  margin-bottom: var(--space-4);
-}
+/* recent-tasks removed */
 
 /* ===== TODAY'S TASKS ===== */
 .todays-tasks h3 {
@@ -918,6 +909,54 @@ html {
   background: rgba(236,72,153,0.08);
   border-color: rgba(236,72,153,0.14);
 }
+
+/* Today's Tasks list styles */
+.todays-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.todays-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.todays-list-item[data-duration-long="true"] {
+  background: rgba(236,72,153,0.06);
+  border-color: rgba(236,72,153,0.12);
+}
+
+.todays-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.todays-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.duration-badge {
+  background: rgba(0,0,0,0.25);
+  color: var(--white);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* Recent dropdown removed */
+
 
 /* Collapsible recent tasks */
 
@@ -956,13 +995,7 @@ html {
   color: var(--gray-600);
 }
 
-/* Make buttons inside the Recent Tasks panel use white text for clarity on dark backgrounds */
-.recent-tasks .btn,
-.recent-tasks button,
-.recent-tasks .btn-secondary,
-.recent-tasks .btn-outline {
-  color: var(--white) !important;
-}
+/* recent-tasks removed */
 
 /* ===== BUTTONS ===== */
 .btn {

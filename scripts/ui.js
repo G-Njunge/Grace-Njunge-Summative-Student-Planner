@@ -284,7 +284,14 @@ class UIManager {
     if (this.elements.clearSearchBtn) {
       this.elements.clearSearchBtn.addEventListener('click', () => {
         this.elements.searchInput.value = '';
-        this.handleSearch('');
+        // Clear search results display
+        const resultsEl = document.getElementById('search-results');
+        if (resultsEl) resultsEl.textContent = '';
+        const resultsListEl = document.getElementById('search-results-list');
+        if (resultsListEl) resultsListEl.innerHTML = '';
+        // Reset search state
+        this.currentSearchResults = [];
+        stateManager.setState({ searchQuery: '', caseSensitive: false });
       });
     }
     
@@ -807,11 +814,19 @@ class UIManager {
     // Update visible results count
     const resultsEl = document.getElementById('search-results');
     if (resultsEl) {
-      resultsEl.textContent = `${results.length} result${results.length !== 1 ? 's' : ''}`;
+      if (query) {
+        resultsEl.textContent = `${results.length} result${results.length !== 1 ? 's' : ''}`;
+      } else {
+        resultsEl.textContent = '';
+      }
     }
 
-    // Render a simple results list for quick preview
-    this.renderSearchResultsList(results.map(r => r.task));
+    // Render a simple results list for quick preview - only if there's a query
+    if (query) {
+      this.renderSearchResultsList(results.map(r => r.task));
+    } else {
+      this.renderSearchResultsList([]);
+    }
     
     // Announce search results
     if (query) {

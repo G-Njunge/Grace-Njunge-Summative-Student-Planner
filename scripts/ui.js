@@ -741,6 +741,8 @@ class UIManager {
       const appContainer = document.getElementById('app');
       if (appContainer && appContainer.contains(targetSection)) {
         appContainer.classList.add('active');
+        // Hide all sibling app-sections, then show only the target one
+        appContainer.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
       }
 
       // Activate the specific section
@@ -1128,6 +1130,8 @@ class UIManager {
       taskActions.updateTask(editingTaskId, payload, stateManager);
     } else {
       taskActions.addTask(payload, stateManager);
+      // Clear form after adding a new task
+      this.clearTaskForm();
     }
   }
   
@@ -1146,6 +1150,20 @@ class UIManager {
       tag: this.elements.taskTag?.value || '',
       description: this.elements.taskDescription?.value || ''
     };
+  }
+  
+  /**
+   * Clear task form after submission
+   */
+  clearTaskForm() {
+    if (this.elements.taskForm) {
+      this.elements.taskForm.reset();
+    }
+    // Clear any error messages
+    const errorFields = ['title', 'date', 'duration', 'tag', 'description'];
+    errorFields.forEach(field => {
+      this.clearFieldError(field);
+    });
   }
   
   /**

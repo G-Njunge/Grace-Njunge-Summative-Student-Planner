@@ -497,7 +497,7 @@ export const taskActions = {
     
     let capStatus = 'success';
     if (percentage > 100) {
-      capStatus = 'error';
+      capStatus = 'success'; // Exceeding goal is an achievement, show in green
     } else if (percentage > 80) {
       capStatus = 'warning';
     }

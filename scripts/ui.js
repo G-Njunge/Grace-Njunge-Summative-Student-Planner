@@ -19,8 +19,7 @@ const SELECTORS = {
   // Sections
   sections: '.section',
   
-  // Dashboard
-  // dashboard stats and homepage widgets removed from index.html
+  // Dashboard stats and homepage widgets removed from index.html
   
   // Tasks
   searchInput: '#search-input',
@@ -1423,40 +1422,72 @@ class UIManager {
   renderWeeklyChart() {
     const canvas = document.querySelector('#weekly-progress-canvas');
     if (!canvas || !canvas.getContext) return;
-
     const ctx = canvas.getContext('2d');
     // Ensure the canvas backing store matches the displayed CSS size for crisp rendering
     const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    const pixelWidth = Math.max(1, Math.floor(rect.width * dpr));
-    const pixelHeight = Math.max(1, Math.floor(rect.height * dpr));
-    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
-      canvas.width = pixelWidth;
-      canvas.height = pixelHeight;
-    }
-
-    // Reset transform and clear (use setTransform to avoid accumulating scale)
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     const tasks = stateManager.getState('tasks') || [];
-    const capSettings = stateManager.getState('capSettings') || { durationCap: stateManager.getState('settings')?.durationCap || 40 };
-    const durationCap = capSettings.durationCap || 0;
 
-    // Build last 7 days array (labels and 0-initialized hours), and compute cumulative
-    const days = [];
+    // Get client rect and size the canvas
+    const rect = canvas.getBoundingClientRect();
+    const cssWidth = rect.width || 200;
+    const cssHeight = rect.height || 160;
+    canvas.width = Math.max(1, Math.floor(cssWidth * dpr));
+    canvas.height = Math.max(1, Math.floor(cssHeight * dpr));
+    // Reset transform and scale to DPR, then use CSS coordinates for drawing and hit testing
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    // Determine week range (start of week = today -6 .. today)
     const today = new Date();
     today.setHours(0,0,0,0);
+    const weekStart = new Date(today);
+    weekStart.setDate(weekStart.getDate() - 6);
+
+    // Count tasks with dueDate inside the week (set tasks) and among them how many are completed
+    let setCount = 0;
+    let achievedCount = 0;
+
+    tasks.forEach(t => {
+      if (!t.dueDate) return;
+      // dueDate may be YYYY-MM-DD or YYYY-MM-DDTHH:MM
+      const due = new Date(String(t.dueDate));
+      if (isNaN(due.getTime())) return;
+      const dueDay = new Date(due);
+      dueDay.setHours(0,0,0,0);
+      if (dueDay >= weekStart && dueDay <= today) {
+        setCount++;
+        if (t.completed) {
+          // completion time may be completedAt or updatedAt
+          const completedTs = t.completedAt || t.updatedAt || null;
+          if (completedTs) {
+            const completedDate = new Date(completedTs);
+            if (!isNaN(completedDate.getTime())) {
+              const completedDay = new Date(completedDate);
+              completedDay.setHours(0,0,0,0);
+              if (completedDay >= weekStart && completedDay <= today) {
+                achievedCount++;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Build last 7 days (labels and 0-initialized hours)
+    const days = [];
+    const todayDay = new Date();
+    todayDay.setHours(0,0,0,0);
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
+      const d = new Date(todayDay);
       d.setDate(d.getDate() - i);
       const key = d.toISOString().split('T')[0];
       days.push({ key, label: d.toLocaleDateString(undefined, { weekday: 'short' }), date: d, hours: 0 });
     }
 
     // Sum durations of tasks completed on each day using completedAt timestamp;
-    // fall back to updatedAt if completedAt is missing (helps imported/older tasks)
-    tasks.forEach(t => {
+    // fall back to updatedAt if completedAt is missing
+    const tasksList = stateManager.getState('tasks') || [];
+    tasksList.forEach(t => {
       if (!t.completed) return;
       const completedTs = t.completedAt || t.updatedAt || null;
       if (!completedTs) return;
@@ -1467,118 +1498,68 @@ class UIManager {
       if (day) day.hours += parseFloat(t.duration || 0) || 0;
     });
 
-    // Goal per day (distribute evenly)
-    const goalPerDay = durationCap / 7;
-    // Drawing parameters (fluid height based on rect)
-    const padding = 28;
-    const cssWidth = rect.width;
-    const cssHeight = rect.height;
-    const chartWidth = cssWidth - padding * 2;
-    const chartHeight = cssHeight - padding * 2;
+    // Drawing parameters
+    const paddingChart = 28;
+    const chartWidth = cssWidth - paddingChart * 2;
+    const chartHeight = cssHeight - paddingChart * 2;
 
-    // Compute per-day counts: tasks set (createdAt) and tasks achieved (completedAt/updatedAt)
-    const perDaySet = days.map(d => 0);
-    const perDayAchieved = days.map(d => 0);
+    // Clear and background
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
 
-    tasks.forEach(t => {
-      // createdAt -> set
-      if (t.createdAt) {
-        const createdKey = new Date(t.createdAt).toISOString().split('T')[0];
-        const idx = days.findIndex(dd => dd.key === createdKey);
-        if (idx >= 0) perDaySet[idx] += 1;
-      }
+    // Determine max for scale
+    const maxHours = Math.max(...days.map(d => d.hours), 1);
 
-      // completedAt/updatedAt -> achieved
-      if (t.completed) {
-        const completedTs = t.completedAt || t.updatedAt || null;
-        if (completedTs) {
-          const completedKey = new Date(completedTs).toISOString().split('T')[0];
-          const idx2 = days.findIndex(dd => dd.key === completedKey);
-          if (idx2 >= 0) perDayAchieved[idx2] += 1;
-        }
-      }
-    });
-
-    const maxCount = Math.max(...perDaySet, ...perDayAchieved, 1);
-
-    // Draw baseline gridlines
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    // Draw horizontal grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
     ctx.lineWidth = 1;
-    ctx.beginPath();
     for (let i = 0; i <= 4; i++) {
-      const y = padding + (chartHeight / 4) * i;
-      ctx.moveTo(padding, y);
-      ctx.lineTo(padding + chartWidth, y);
+      const y = paddingChart + (chartHeight / 4) * i;
+      ctx.beginPath(); ctx.moveTo(paddingChart, y); ctx.lineTo(paddingChart + chartWidth, y); ctx.stroke();
     }
-    ctx.stroke();
 
-    // Draw lines for 'set' and 'achieved'
-    const slotWidth = chartWidth / (days.length - 1);
+    // Draw x-axis baseline for visibility
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.moveTo(paddingChart, paddingChart + chartHeight); ctx.lineTo(paddingChart + chartWidth, paddingChart + chartHeight); ctx.stroke();
 
-    // Draw 'set' line (left color)
-    ctx.strokeStyle = 'rgba(255, 159, 67, 0.95)'; // orange
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    perDaySet.forEach((val, i) => {
-      const x = padding + slotWidth * i;
-      const y = padding + chartHeight - (val / maxCount) * chartHeight;
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
+    // Draw bars
+    const slotWidth = chartWidth / days.length;
+    const points = [];
+    days.forEach((d, i) => {
+      const x = paddingChart + slotWidth * i + slotWidth * 0.12;
+      const w = slotWidth * 0.76;
+      const h = (d.hours / maxHours) * chartHeight;
+      const y = paddingChart + chartHeight - h;
 
-    // Draw 'achieved' line (blue)
-    ctx.strokeStyle = 'rgba(99, 102, 241, 0.98)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    perDayAchieved.forEach((val, i) => {
-      const x = padding + slotWidth * i;
-      const y = padding + chartHeight - (val / maxCount) * chartHeight;
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
+      // bar
+      ctx.fillStyle = 'rgba(99, 102, 241, 0.95)';
+      ctx.fillRect(x, y, w, Math.max(2, h));
 
-    // Draw points and labels
-    perDaySet.forEach((val, i) => {
-      const x = padding + slotWidth * i;
-      const ySet = padding + chartHeight - (val / maxCount) * chartHeight;
-      const valA = perDayAchieved[i];
-      const yAch = padding + chartHeight - (valA / maxCount) * chartHeight;
-
-      // set point
-      ctx.fillStyle = 'rgba(255, 159, 67, 0.95)';
-      ctx.beginPath(); ctx.arc(x, ySet, 3, 0, Math.PI * 2); ctx.fill();
-
-      // achieved point
-      ctx.fillStyle = 'rgba(99, 102, 241, 0.98)';
-      ctx.beginPath(); ctx.arc(x, yAch, 3, 0, Math.PI * 2); ctx.fill();
-
-      // weekday label
+      // label
       ctx.fillStyle = 'rgba(255,255,255,0.85)';
       ctx.font = '12px Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(days[i].label, x, padding + chartHeight + 14);
+      ctx.fillText(d.label, x + w / 2, paddingChart + chartHeight + 14);
+
+      // value above bar
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.font = '11px Inter, system-ui';
+      ctx.fillText(d.hours.toFixed(1), x + w / 2, y - 8);
+
+      points.push({ x: x + w / 2, achieved: d.hours, label: d.label });
     });
 
     // Legend
     ctx.fillStyle = 'rgba(255,255,255,0.85)';
     ctx.font = '12px Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
-    ctx.fillRect(padding, 6, 12, 8);
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.fillText('Tasks Set', padding + 18, 14);
+    ctx.fillText('Productive hours (completed tasks)', paddingChart, 16);
 
-    ctx.fillStyle = 'rgba(99, 102, 241, 0.98)';
-    ctx.fillRect(padding + 120, 6, 12, 8);
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.fillText('Tasks Achieved', padding + 140, 14);
-
-    // Store chart data for tooltip interaction
-    const points = days.map((d, i) => ({
-      x: padding + slotWidth * i,
-      set: perDaySet[i],
-      achieved: perDayAchieved[i],
-      label: d.label
-    }));
-    this._lastChartData = { points, padding, chartWidth, chartHeight };
+    // Store chart data for tooltip interaction (CSS coords)
+    this._lastChartData = { points, padding: paddingChart, chartWidth, chartHeight };
+    this._lastPie = null;
+    // Debug info
+    try {
+      console.debug('weeklyChart', { cssWidth, cssHeight, days: days.map(d => ({ label: d.label, hours: d.hours })), maxHours, points });
+    } catch (e) {}
     this._attachChartPointerHandlers();
   }
 
@@ -1596,23 +1577,47 @@ class UIManager {
       return { x, y, rect };
     };
 
-    const showTooltip = (evt) => {
-      if (!this._lastChartData) return;
-      const { x, y, rect } = getLocal(evt);
-      const { days, padding, chartWidth, slotWidth } = this._lastChartData;
-      const relX = x - padding;
-      if (relX < 0 || relX > chartWidth) { tooltip.style.display = 'none'; return; }
-      const idx = Math.floor(relX / slotWidth);
-      const clamped = Math.max(0, Math.min(days.length - 1, idx));
-      const d = days[clamped];
-      if (!d) { tooltip.style.display = 'none'; return; }
+    const pointInCircle = (px, py, cx, cy, r) => {
+      const dx = px - cx; const dy = py - cy; return dx*dx + dy*dy <= r*r;
+    };
 
-      const goalPerDay = (stateManager.getState('capSettings')?.durationCap || stateManager.getState('settings')?.durationCap || 40) / 7;
-      tooltip.style.display = 'block';
-      tooltip.textContent = `${d.label}: ${d.hours.toFixed(1)}h / ${goalPerDay.toFixed(1)}h`;
-      const left = Math.min(rect.width - 140, Math.max(8, x + 8));
-      tooltip.style.left = left + 'px';
-      tooltip.style.top = Math.max(8, y + 8) + 'px';
+    const showTooltip = (evt) => {
+      // Prefer pie tooltip if available
+      if (this._lastPie) {
+        const { x, y, rect } = getLocal(evt);
+        const p = this._lastPie;
+        // only show when pointer is inside pie radius
+        if (!pointInCircle(x, y, p.cx, p.cy, p.radius)) { tooltip.style.display = 'none'; return; }
+        const percent = p.setCount === 0 ? 0 : Math.round((p.achievedCount / p.setCount) * 100);
+        tooltip.style.display = 'block';
+        tooltip.innerHTML = `<strong>${p.achievedCount}/${p.setCount}</strong><br>${percent}% achieved`;
+        const left = Math.min(rect.width - 160, Math.max(8, (evt.touches ? evt.touches[0].clientX : evt.clientX) + 8));
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = Math.max(8, (evt.touches ? evt.touches[0].clientY : evt.clientY) + 8) + 'px';
+        return;
+      }
+
+  // Fallback to per-day tooltip when chart data exists
+  if (!this._lastChartData || !this._lastChartData.points) { tooltip.style.display = 'none'; return; }
+  const pts = this._lastChartData.points;
+  if (!Array.isArray(pts) || pts.length === 0) { tooltip.style.display = 'none'; return; }
+
+  const { x, y, rect } = getLocal(evt);
+  const { padding = 0, chartWidth = rect.width } = this._lastChartData;
+  const relX = x - padding;
+  if (relX < 0 || relX > chartWidth) { tooltip.style.display = 'none'; return; }
+  // compute slot width defensively
+  const slotWidth = chartWidth / Math.max(1, pts.length);
+  const idx = Math.floor(relX / slotWidth);
+  const clamped = Math.max(0, Math.min(pts.length - 1, idx));
+  const d = pts[clamped];
+  if (!d) { tooltip.style.display = 'none'; return; }
+
+  tooltip.style.display = 'block';
+  tooltip.textContent = `${d.label}: ${d.achieved} achieved • ${d.set} set`;
+  const left = Math.min(rect.width - 160, Math.max(8, (evt.touches ? evt.touches[0].clientX : evt.clientX) + 8));
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = Math.max(8, (evt.touches ? evt.touches[0].clientY : evt.clientY) + 8) + 'px';
     };
 
     const hideTooltip = () => { tooltip.style.display = 'none'; };

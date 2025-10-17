@@ -841,12 +841,12 @@ class UIManager {
         <div class="search-result-item" data-task-id="${task.id}" style="padding:8px 12px;border:1px solid rgba(0,0,0,0.06);border-radius:8px;margin-bottom:8px;background:var(--surface, #fff);">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
             <div style="flex:1">
-              <div style="font-weight:600">${this.escapeHtml(task.title)}</div>
-              <div style="color:var(--muted);font-size:0.9rem">Tag: ${this.escapeHtml(task.tag)} • Due: ${due}</div>
+              <div style="font-weight:600;color:#1f2937;">${this.escapeHtml(task.title)}</div>
+              <div style="color:#6b7280;font-size:0.9rem">Tag: ${this.escapeHtml(task.tag)} • Due: ${due}</div>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-              <div style="white-space:nowrap;color:var(--muted);font-weight:600">${duration}</div>
-              <label style="font-size:0.85rem;color:var(--muted);">
+              <div style="white-space:nowrap;color:#6b7280;font-weight:600">${duration}</div>
+              <label style="font-size:0.85rem;color:#6b7280;">
                 <input type="checkbox" class="search-result-complete" data-task-id="${task.id}" ${task.completed ? 'checked' : ''}> Done
               </label>
             </div>
@@ -1405,13 +1405,13 @@ class UIManager {
     const { currentWeekDuration, durationCap, capStatus, percentage } = capSettings;
     this.elements.capStatus.className = `cap-status ${capStatus}`;
     if (percentage > 100) {
-      this.elements.capStatus.textContent = `Over target by ${(currentWeekDuration - durationCap).toFixed(1)} hours (${percentage}%)`;
+      this.elements.capStatus.textContent = `You've exceeded your weekly goal by ${(currentWeekDuration - durationCap).toFixed(1)} hours! (${percentage}%)`;
       this.elements.capStatus.setAttribute('aria-live', 'assertive');
     } else if (percentage > 80) {
-      this.elements.capStatus.textContent = `${(durationCap - currentWeekDuration).toFixed(1)} hours remaining (${percentage}%)`;
+      this.elements.capStatus.textContent = `You have accomplished ${percentage}% of your weekly goal! ${(durationCap - currentWeekDuration).toFixed(1)} hours remaining`;
       this.elements.capStatus.setAttribute('aria-live', 'polite');
     } else {
-      this.elements.capStatus.textContent = `${(durationCap - currentWeekDuration).toFixed(1)} hours remaining (${percentage}%)`;
+      this.elements.capStatus.textContent = `You have accomplished ${percentage}% of your weekly goal. ${(durationCap - currentWeekDuration).toFixed(1)} hours remaining`;
       this.elements.capStatus.setAttribute('aria-live', 'polite');
     }
   }
@@ -1473,19 +1473,12 @@ class UIManager {
       }
     });
 
-    // Build last 7 days (labels and 0-initialized hours)
-    const days = [];
-    const todayDay = new Date();
-    todayDay.setHours(0,0,0,0);
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(todayDay);
-      d.setDate(d.getDate() - i);
-      const key = d.toISOString().split('T')[0];
-      days.push({ key, label: d.toLocaleDateString(undefined, { weekday: 'short' }), date: d, hours: 0 });
-    }
-
-    // Sum durations of tasks completed on each day using completedAt timestamp;
-    // fall back to updatedAt if completedAt is missing
+    // Get weekly goal and compute completed hours
+    const capSettings = stateManager.getState('capSettings') || {};
+    const weeklyGoal = capSettings.durationCap || stateManager.getState('settings')?.durationCap || 40;
+    
+    // Sum completed hours this week
+    let completedHours = 0;
     const tasksList = stateManager.getState('tasks') || [];
     tasksList.forEach(t => {
       if (!t.completed) return;
@@ -1493,73 +1486,74 @@ class UIManager {
       if (!completedTs) return;
       const completedDate = new Date(completedTs);
       if (isNaN(completedDate.getTime())) return;
-      const k = completedDate.toISOString().split('T')[0];
-      const day = days.find(d => d.key === k);
-      if (day) day.hours += parseFloat(t.duration || 0) || 0;
+      const completedDay = new Date(completedDate);
+      completedDay.setHours(0,0,0,0);
+      if (completedDay >= weekStart && completedDay <= today) {
+        completedHours += parseFloat(t.duration || 0) || 0;
+      }
     });
 
-    // Drawing parameters
-    const paddingChart = 28;
-    const chartWidth = cssWidth - paddingChart * 2;
-    const chartHeight = cssHeight - paddingChart * 2;
+    const remainingHours = Math.max(0, weeklyGoal - completedHours);
 
-    // Clear and background
-    ctx.clearRect(0, 0, cssWidth, cssHeight);
+    // Draw pie chart (donut) showing completed vs remaining hours toward goal
+    const padding = 8;
+    const cx = cssWidth / 2;
+    const cy = cssHeight / 2;
+    const radius = Math.max(8, Math.min(cssWidth, cssHeight) / 2 - padding * 2);
 
-    // Determine max for scale
-    const maxHours = Math.max(...days.map(d => d.hours), 1);
+    const total = Math.max(1, weeklyGoal);
+    const completedAngle = (completedHours / total) * Math.PI * 2;
 
-    // Draw horizontal grid lines
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 4; i++) {
-      const y = paddingChart + (chartHeight / 4) * i;
-      ctx.beginPath(); ctx.moveTo(paddingChart, y); ctx.lineTo(paddingChart + chartWidth, y); ctx.stroke();
-    }
+    // Background circle (remaining hours)
+    ctx.fillStyle = 'rgba(255,159,67,0.25)'; // Orange for remaining
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fill();
 
-    // Draw x-axis baseline for visibility
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.beginPath(); ctx.moveTo(paddingChart, paddingChart + chartHeight); ctx.lineTo(paddingChart + chartWidth, paddingChart + chartHeight); ctx.stroke();
+    // Completed slice (start at top)
+    ctx.fillStyle = 'rgba(99,102,241,0.95)'; // Blue for completed
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, -Math.PI/2, -Math.PI/2 + completedAngle);
+    ctx.closePath();
+    ctx.fill();
 
-    // Draw bars
-    const slotWidth = chartWidth / days.length;
-    const points = [];
-    days.forEach((d, i) => {
-      const x = paddingChart + slotWidth * i + slotWidth * 0.12;
-      const w = slotWidth * 0.76;
-      const h = (d.hours / maxHours) * chartHeight;
-      const y = paddingChart + chartHeight - h;
+    // Draw inner circle to create donut effect
+    ctx.fillStyle = 'rgba(20,20,20,0.9)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.56, 0, Math.PI * 2);
+    ctx.fill();
 
-      // bar
-      ctx.fillStyle = 'rgba(99, 102, 241, 0.95)';
-      ctx.fillRect(x, y, w, Math.max(2, h));
+    // Center label
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.font = '14px Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${completedHours.toFixed(1)}h / ${weeklyGoal}h`, cx, cy);
 
-      // label
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      ctx.font = '12px Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(d.label, x + w / 2, paddingChart + chartHeight + 14);
-
-      // value above bar
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      ctx.font = '11px Inter, system-ui';
-      ctx.fillText(d.hours.toFixed(1), x + w / 2, y - 8);
-
-      points.push({ x: x + w / 2, achieved: d.hours, label: d.label });
-    });
-
-    // Legend
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    // Legend with color swatches
     ctx.font = '12px Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
-    ctx.fillText('Productive hours (completed tasks)', paddingChart, 16);
+    ctx.textAlign = 'left';
+    // Completed legend (blue)
+    ctx.fillStyle = 'rgba(99,102,241,0.95)';
+    ctx.fillRect(padding + 4, 8, 12, 8);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText('Completed', padding + 20, 16);
+    // Remaining legend (orange)
+    ctx.fillStyle = 'rgba(255,159,67,0.6)';
+    ctx.fillRect(padding + 120, 8, 12, 8);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText('Remaining', padding + 136, 16);
 
-    // Store chart data for tooltip interaction (CSS coords)
-    this._lastChartData = { points, padding: paddingChart, chartWidth, chartHeight };
-    this._lastPie = null;
-    // Debug info
+    // Store for tooltip (use CSS coordinates for hit testing)
+    this._lastPie = { cx, cy, radius, completedHours, remainingHours, weeklyGoal };
+    // Clear any legacy per-day chart data so tooltip fallback won't show stale info
+    this._lastChartData = null;
+
+    // Debug info to help diagnose rendering issues in the browser console
     try {
-      console.debug('weeklyChart', { cssWidth, cssHeight, days: days.map(d => ({ label: d.label, hours: d.hours })), maxHours, points });
-    } catch (e) {}
+      console.debug('renderWeeklyChart:', { completedHours, remainingHours, weeklyGoal, cssWidth, cssHeight, cx, cy, radius });
+    } catch (e) { /* ignore in old consoles */ }
     this._attachChartPointerHandlers();
   }
 
@@ -1588,12 +1582,14 @@ class UIManager {
         const p = this._lastPie;
         // only show when pointer is inside pie radius
         if (!pointInCircle(x, y, p.cx, p.cy, p.radius)) { tooltip.style.display = 'none'; return; }
-        const percent = p.setCount === 0 ? 0 : Math.round((p.achievedCount / p.setCount) * 100);
+        const percent = p.weeklyGoal === 0 ? 0 : Math.round((p.completedHours / p.weeklyGoal) * 100);
         tooltip.style.display = 'block';
-        tooltip.innerHTML = `<strong>${p.achievedCount}/${p.setCount}</strong><br>${percent}% achieved`;
-        const left = Math.min(rect.width - 160, Math.max(8, (evt.touches ? evt.touches[0].clientX : evt.clientX) + 8));
+        tooltip.innerHTML = `<strong>Completed:</strong> ${p.completedHours.toFixed(1)}h<br><strong>Remaining:</strong> ${p.remainingHours.toFixed(1)}h<br>${percent}% of goal`;
+        // Position relative to canvas (using local coordinates + offset)
+        const left = Math.min(rect.width - 160, Math.max(8, x + 12));
+        const top = Math.max(8, Math.min(rect.height - 60, y + 12));
         tooltip.style.left = left + 'px';
-        tooltip.style.top = Math.max(8, (evt.touches ? evt.touches[0].clientY : evt.clientY) + 8) + 'px';
+        tooltip.style.top = top + 'px';
         return;
       }
 
@@ -1615,9 +1611,11 @@ class UIManager {
 
   tooltip.style.display = 'block';
   tooltip.textContent = `${d.label}: ${d.achieved} achieved • ${d.set} set`;
-  const left = Math.min(rect.width - 160, Math.max(8, (evt.touches ? evt.touches[0].clientX : evt.clientX) + 8));
+  // Position relative to canvas (using local coordinates + offset)
+  const left = Math.min(rect.width - 160, Math.max(8, x + 12));
+  const top = Math.max(8, Math.min(rect.height - 40, y + 12));
   tooltip.style.left = left + 'px';
-  tooltip.style.top = Math.max(8, (evt.touches ? evt.touches[0].clientY : evt.clientY) + 8) + 'px';
+  tooltip.style.top = top + 'px';
     };
 
     const hideTooltip = () => { tooltip.style.display = 'none'; };

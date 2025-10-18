@@ -42,40 +42,54 @@ export function throttle(func, limit) {
 }
 
 /**
- * Format date to readable string
+ * Format date to readable string with user preference support
  * @param {string|Date} date - Date to format
- * @param {string} format - Format type
+ * @param {string} userFormat - User's preferred date format (YYYY-MM-DD, MM/DD/YYYY, DD/MM/YYYY)
  * @returns {string} Formatted date string
  */
-export function formatDate(date, format = 'short') {
+export function formatDate(date, userFormat = null) {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   
   if (isNaN(dateObj.getTime())) {
     return 'Invalid Date';
   }
   
-  const options = {
-    short: { month: 'short', day: 'numeric', year: 'numeric' },
-    long: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
-    time: { hour: '2-digit', minute: '2-digit' },
-    datetime: { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric',
-      hour: '2-digit', 
-      minute: '2-digit' 
+  // If a specific user format is provided, use it
+  if (userFormat) {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    
+    switch(userFormat) {
+      case 'YYYY-MM-DD':
+        return `${year}-${month}-${day}`;
+      case 'MM/DD/YYYY':
+        return `${month}/${day}/${year}`;
+      case 'DD/MM/YYYY':
+        return `${day}/${month}/${year}`;
+      default:
+        return `${year}-${month}-${day}`;
     }
-  };
+  }
   
-  return dateObj.toLocaleDateString('en-US', options[format] || options.short);
+  // Default fallback to short format
+  const options = { month: 'short', day: 'numeric', year: 'numeric' };
+  return dateObj.toLocaleDateString('en-US', options);
 }
 
 /**
- * Format duration in hours to readable string
+ * Format duration based on user's time unit preference
  * @param {number} hours - Duration in hours
+ * @param {string} timeUnit - User's preferred time unit ('hours' or 'minutes')
  * @returns {string} Formatted duration string
  */
-export function formatDuration(hours) {
+export function formatDuration(hours, timeUnit = 'hours') {
+  if (timeUnit === 'minutes') {
+    const totalMinutes = Math.round(hours * 60);
+    return `${totalMinutes} minute${totalMinutes !== 1 ? 's' : ''}`;
+  }
+  
+  // Default to hours format
   if (hours < 1) {
     const minutes = Math.round(hours * 60);
     return `${minutes} minute${minutes !== 1 ? 's' : ''}`;

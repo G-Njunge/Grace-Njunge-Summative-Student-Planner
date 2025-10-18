@@ -1099,6 +1099,39 @@ html {
   color: var(--white);
 }
 
+/* Select dropdown styling */
+select.form-input,
+select.select,
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+select.form-input option,
+select.select option,
+select option {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  padding: 0.5rem;
+}
+
+select.form-input option:hover,
+select.form-input option:focus,
+select.form-input option:checked,
+select.select option:hover,
+select.select option:focus,
+select.select option:checked,
+select option:hover,
+select option:focus,
+select option:checked {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+
 .form-textarea {
   resize: vertical;
   min-height: 100px;
@@ -1120,6 +1153,55 @@ html {
 .select.error {
   border-color: var(--error-color);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-input.success {
+  border-color: var(--success-color);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.error-message {
+  color: var(--error-color);
+  font-size: var(--font-size-sm);
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.error-message::before {
+  content: '⚠';
+  font-size: 1rem;
+}
+
+.success-message {
+  color: var(--success-color);
+  font-size: var(--font-size-sm);
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.success-message::before {
+  content: '✓';
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+#email-input-group {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .form-actions {

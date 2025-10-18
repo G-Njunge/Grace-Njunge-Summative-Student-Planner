@@ -8,6 +8,310 @@
 import { initializeState, stateManager, uiActions } from './state.js';
 import { initializeUI, uiManager } from './ui.js';
 import { searchManager } from './search.js';
+import { loadSettings, saveSettings } from './storage.js';
+import { isValidEmail, getEmailValidationError } from './email-validator.js';
+
+/**
+ * Update date format example display
+ */
+function updateDateFormatExample(format) {
+  const exampleElement = document.getElementById('date-format-example');
+  if (!exampleElement) return;
+  
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  
+  let example;
+  switch(format) {
+    case 'YYYY-MM-DD':
+      example = `${year}-${month}-${day}`;
+      break;
+    case 'MM/DD/YYYY':
+      example = `${month}/${day}/${year}`;
+      break;
+    case 'DD/MM/YYYY':
+      example = `${day}/${month}/${year}`;
+      break;
+    default:
+      example = `${year}-${month}-${day}`;
+  }
+  
+  exampleElement.textContent = `Example: ${example}`;
+}
+
+/**
+ * Initialize task form fields based on preferences
+ */
+function initializeTaskForm() {
+  const taskDurationInput = document.getElementById('task-duration');
+  const taskDurationLabel = document.getElementById('task-duration-unit-label');
+  
+  if (!taskDurationInput || !taskDurationLabel) return; // Not on tasks page
+  
+  const settings = loadSettings();
+  const timeUnit = settings.timeUnit || 'hours';
+  
+  // Update label text
+  taskDurationLabel.textContent = timeUnit;
+  
+  // Update input step, placeholder, and max based on time unit
+  if (timeUnit === 'minutes') {
+    taskDurationInput.step = '15';
+    taskDurationInput.placeholder = '60';
+    taskDurationInput.max = '1200'; // 20 hours = 1200 minutes
+  } else {
+    taskDurationInput.step = '0.25';
+    taskDurationInput.placeholder = '2.5';
+    taskDurationInput.max = '20'; // 20 hours
+  }
+}
+
+/**
+ * Initialize settings page
+ */
+function initializeSettingsPage() {
+  const timeUnitSelect = document.getElementById('time-unit');
+  const dateFormatSelect = document.getElementById('date-format');
+  const dueRemindersCheckbox = document.getElementById('due-reminders');
+  const emailInputGroup = document.getElementById('email-input-group');
+  const emailInput = document.getElementById('reminder-email');
+  
+  if (!timeUnitSelect) return; // Not on settings page
+  
+  // Load current settings
+  const settings = loadSettings();
+  
+  // Set current values
+  timeUnitSelect.value = settings.timeUnit || 'hours';
+  dateFormatSelect.value = settings.dateFormat || 'YYYY-MM-DD';
+  dueRemindersCheckbox.checked = settings.dueReminders !== false;
+  
+  // Set email value if exists
+  if (emailInput && settings.reminderEmail) {
+    emailInput.value = settings.reminderEmail;
+    // Show success message if email is already saved
+    const emailSuccess = document.getElementById('email-success');
+    if (emailSuccess) {
+      emailSuccess.textContent = 'Email saved successfully';
+      emailSuccess.style.display = 'flex';
+    }
+  }
+  
+  // Show/hide email input based on checkbox state
+  if (emailInputGroup) {
+    emailInputGroup.style.display = settings.dueReminders !== false ? 'block' : 'none';
+  }
+  
+  // Update date format example
+  updateDateFormatExample(settings.dateFormat || 'YYYY-MM-DD');
+  
+  // Update cap unit label on dashboard if it exists
+  const capUnitLabel = document.getElementById('cap-unit-label');
+  if (capUnitLabel) {
+    capUnitLabel.textContent = settings.timeUnit || 'hours';
+  }
+  
+  // Update duration cap input step based on time unit
+  const capInput = document.getElementById('duration-cap');
+  if (capInput) {
+    const timeUnit = settings.timeUnit || 'hours';
+    capInput.step = timeUnit === 'minutes' ? '15' : '0.5';
+  }
+  
+  // Add event listeners
+  timeUnitSelect.addEventListener('change', (e) => {
+    const oldSettings = loadSettings();
+    const oldUnit = oldSettings.timeUnit || 'hours';
+    const newUnit = e.target.value;
+    
+    // Convert duration cap if it exists
+    let newDurationCap = oldSettings.durationCap;
+    if (newDurationCap && oldUnit !== newUnit) {
+      if (oldUnit === 'hours' && newUnit === 'minutes') {
+        // Convert hours to minutes
+        newDurationCap = newDurationCap * 60;
+      } else if (oldUnit === 'minutes' && newUnit === 'hours') {
+        // Convert minutes to hours
+        newDurationCap = newDurationCap / 60;
+      }
+    }
+    
+    const newSettings = { ...oldSettings, timeUnit: newUnit, durationCap: newDurationCap };
+    saveSettings(newSettings);
+    console.log('Time unit preference updated to:', newUnit);
+    
+    // Update the cap unit label on dashboard if it exists
+    const capUnitLabel = document.getElementById('cap-unit-label');
+    if (capUnitLabel) {
+      capUnitLabel.textContent = newUnit;
+    }
+    
+    // Update the duration cap input value if it exists
+    const capInput = document.getElementById('duration-cap');
+    if (capInput && newDurationCap) {
+      capInput.value = newDurationCap;
+      // Update step for input
+      capInput.step = newUnit === 'minutes' ? '15' : '0.5';
+    }
+    
+    // Update task duration label and input if it exists
+    const taskDurationLabel = document.getElementById('task-duration-unit-label');
+    if (taskDurationLabel) {
+      taskDurationLabel.textContent = newUnit;
+    }
+    const taskDurationInput = document.getElementById('task-duration');
+    if (taskDurationInput) {
+      if (newUnit === 'minutes') {
+        taskDurationInput.step = '15';
+        taskDurationInput.placeholder = '60';
+        taskDurationInput.max = '1200'; // 20 hours = 1200 minutes
+      } else {
+        taskDurationInput.step = '0.25';
+        taskDurationInput.placeholder = '2.5';
+        taskDurationInput.max = '20'; // 20 hours
+      }
+    }
+    
+    // Show toast notification
+    if (window.uiManager && window.uiManager.showToast) {
+      window.uiManager.showToast('Time unit preference updated successfully', 'success');
+    }
+  });
+  
+  dateFormatSelect.addEventListener('change', (e) => {
+    const newSettings = { ...loadSettings(), dateFormat: e.target.value };
+    saveSettings(newSettings);
+    console.log('Date format preference updated to:', e.target.value);
+    
+    // Update date format example
+    updateDateFormatExample(e.target.value);
+    
+    // Re-render tasks if we're on the tasks page
+    if (window.uiManager && window.uiManager.renderTasks) {
+      const currentState = window.stateManager ? window.stateManager.getState() : null;
+      if (currentState && currentState.tasks) {
+        window.uiManager.renderTasks(currentState.tasks);
+      }
+    }
+    
+    if (window.uiManager && window.uiManager.showToast) {
+      window.uiManager.showToast('Date format preference updated successfully', 'success');
+    }
+  });
+  
+  dueRemindersCheckbox.addEventListener('change', (e) => {
+    const isChecked = e.target.checked;
+    
+    // Show/hide email input
+    if (emailInputGroup) {
+      emailInputGroup.style.display = isChecked ? 'block' : 'none';
+    }
+    
+    // Save preference
+    const currentSettings = loadSettings();
+    const newSettings = { ...currentSettings, dueReminders: isChecked };
+    
+    // If unchecking, remove email from settings
+    if (!isChecked) {
+      delete newSettings.reminderEmail;
+      if (emailInput) {
+        emailInput.value = '';
+      }
+    }
+    
+    saveSettings(newSettings);
+    console.log('Due reminders preference updated to:', isChecked);
+    
+    if (window.uiManager && window.uiManager.showToast) {
+      window.uiManager.showToast('Notification preferences updated', 'success');
+    }
+  });
+  
+  // Handle Save Email button click
+  const saveEmailBtn = document.getElementById('save-email-btn');
+  const emailError = document.getElementById('email-error');
+  const emailSuccess = document.getElementById('email-success');
+  
+  if (saveEmailBtn && emailInput) {
+    saveEmailBtn.addEventListener('click', () => {
+      const email = emailInput.value.trim();
+      
+      // Hide previous messages
+      if (emailError) {
+        emailError.style.display = 'none';
+        emailError.textContent = '';
+      }
+      if (emailSuccess) {
+        emailSuccess.style.display = 'none';
+        emailSuccess.textContent = '';
+      }
+      
+      // Remove previous validation classes
+      emailInput.classList.remove('error', 'success');
+      
+      // Validate email
+      if (!email) {
+        emailInput.classList.add('error');
+        if (emailError) {
+          emailError.textContent = 'Email address is required';
+          emailError.style.display = 'flex';
+        }
+        return;
+      }
+      
+      if (!isValidEmail(email)) {
+        emailInput.classList.add('error');
+        if (emailError) {
+          // Get specific error message
+          const errorMsg = getEmailValidationError(email);
+          emailError.textContent = errorMsg || 'Please enter a valid email address';
+          emailError.style.display = 'flex';
+        }
+        return;
+      }
+      
+      // Email is valid - save it
+      emailInput.classList.add('success');
+      const newSettings = { ...loadSettings(), reminderEmail: email.toLowerCase() };
+      saveSettings(newSettings);
+      console.log('Reminder email saved:', email);
+      
+      // Show success message
+      if (emailSuccess) {
+        emailSuccess.textContent = 'Email saved successfully';
+        emailSuccess.style.display = 'flex';
+      }
+      
+      if (window.uiManager && window.uiManager.showToast) {
+        window.uiManager.showToast('Email address saved successfully', 'success');
+      }
+    });
+    
+    // Allow Enter key to save email
+    emailInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveEmailBtn.click();
+      }
+    });
+    
+    // Clear error when user starts typing
+    emailInput.addEventListener('input', () => {
+      if (emailError && emailError.style.display !== 'none') {
+        emailError.style.display = 'none';
+        emailError.textContent = '';
+        emailInput.classList.remove('error');
+      }
+      if (emailSuccess && emailSuccess.style.display !== 'none') {
+        emailSuccess.style.display = 'none';
+        emailSuccess.textContent = '';
+        emailInput.classList.remove('success');
+      }
+    });
+  }
+}
 
 /**
  * Application class
@@ -76,6 +380,22 @@ class CampusLifePlanner {
         console.log('Keyboard shortcuts set');
       } catch (err) {
         console.error('Keyboard shortcuts setup failed:', err);
+      }
+
+      // Initialize settings page
+      try {
+        initializeSettingsPage();
+        console.log('Settings page initialized');
+      } catch (err) {
+        console.error('Settings page initialization failed:', err);
+      }
+
+      // Initialize task form
+      try {
+        initializeTaskForm();
+        console.log('Task form initialized');
+      } catch (err) {
+        console.error('Task form initialization failed:', err);
       }
 
       // Setup performance monitoring

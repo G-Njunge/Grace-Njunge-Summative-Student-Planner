@@ -6,6 +6,8 @@
 import { stateManager, taskActions, uiActions, settingsActions } from './state.js';
 import { searchManager, filterTasks, sortTasks } from './search.js';
 import { validateField } from './validators.js';
+import { formatDuration, formatDate } from './utils.js';
+import { loadSettings } from './storage.js';
 
 /**
  * DOM element selectors
@@ -31,6 +33,8 @@ const SELECTORS = {
   tasksGrid: '#tasks-grid',
   tasksLoading: '#tasks-loading',
   tasksEmpty: '#tasks-empty',
+  completedTasksGrid: '#completed-tasks-grid',
+  completedTasksEmpty: '#completed-tasks-empty',
 
   // Dashboard stats (selectors present in dashboard.html)
   totalTasks: '#total-tasks',
@@ -461,8 +465,20 @@ class UIManager {
    * Bind modal events
    */
   bindModalEvents() {
+    if (this.elements.modalConfirm) {
+      this.elements.modalConfirm.addEventListener('click', () => {
+        // Execute the stored callback if it exists
+        if (typeof this.modalConfirmCallback === 'function') {
+          this.modalConfirmCallback();
+          this.modalConfirmCallback = null; // Clear callback after execution
+        }
+        uiActions.hideModal(stateManager);
+      });
+    }
+    
     if (this.elements.modalCancel) {
       this.elements.modalCancel.addEventListener('click', () => {
+        this.modalConfirmCallback = null; // Clear callback on cancel
         uiActions.hideModal(stateManager);
       });
     }
@@ -471,6 +487,7 @@ class UIManager {
     if (this.elements.modal) {
       this.elements.modal.addEventListener('click', (e) => {
         if (e.target === this.elements.modal || e.target.classList.contains('modal-backdrop')) {
+          this.modalConfirmCallback = null; // Clear callback on backdrop click
           uiActions.hideModal(stateManager);
         }
       });
@@ -479,6 +496,7 @@ class UIManager {
     // Close modal on escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && stateManager.getState('showModal')) {
+        this.modalConfirmCallback = null; // Clear callback on escape
         uiActions.hideModal(stateManager);
       }
     });
@@ -851,9 +869,10 @@ class UIManager {
       return;
     }
 
+    const settings = loadSettings();
     container.innerHTML = tasks.map(task => {
-      const due = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-';
-      const duration = task.duration ? `${parseFloat(task.duration)} h` : '-';
+      const due = task.dueDate ? formatDate(new Date(task.dueDate), settings.dateFormat || 'YYYY-MM-DD') : '-';
+      const duration = task.duration ? formatDuration(parseFloat(task.duration), settings.timeUnit) : '-';
       return `
         <div class="search-result-item" data-task-id="${task.id}" style="padding:8px 12px;border:1px solid rgba(0,0,0,0.06);border-radius:8px;margin-bottom:8px;background:var(--surface, #fff);">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
@@ -908,7 +927,14 @@ class UIManager {
    */
   renderTasks() {
     const tasks = stateManager.getState('tasks');
-    const sortBy = stateManager.getState('sortBy');
+    let sortBy = stateManager.getState('sortBy');
+    
+    // Default to priority sorting if not set
+    if (!sortBy) {
+      sortBy = 'priority';
+      stateManager.setState({ sortBy: 'priority' }, false); // Set without triggering re-render
+    }
+    
     const activeFilters = stateManager.getState('activeFilters');
     
     // Apply filters
@@ -920,40 +946,51 @@ class UIManager {
       filteredTasks = filteredTasks.filter(task => searchTaskIds.includes(task.id));
     }
     
-    // Apply sorting
-    const sortedTasks = sortTasks(filteredTasks, sortBy);
+    // Separate completed and incomplete tasks
+    const incompleteTasks = filteredTasks.filter(task => !task.completed);
+    const completedTasks = filteredTasks.filter(task => task.completed);
     
-    // Render tasks
-    this.renderTasksGrid(sortedTasks);
-  console.log('uiManager.renderTasks: rendering', sortedTasks.length, 'tasks');
+    // Apply sorting
+    const sortedIncompleteTasks = sortTasks(incompleteTasks, sortBy);
+    const sortedCompletedTasks = sortTasks(completedTasks, sortBy);
+    
+    // Render tasks in their respective sections
+    this.renderTasksGrid(sortedIncompleteTasks, false);
+    this.renderTasksGrid(sortedCompletedTasks, true);
+    
+    // Bind events once after both sections are rendered
+    this.bindTaskCardEvents();
+    
+  console.log('uiManager.renderTasks: rendering', sortedIncompleteTasks.length, 'incomplete and', sortedCompletedTasks.length, 'completed tasks');
   }
   
   /**
    * Render tasks grid
    * @param {Array} tasks - Tasks to render
+   * @param {boolean} isCompleted - Whether these are completed tasks
    */
-  renderTasksGrid(tasks) {
-    const grid = this.elements.tasksGrid;
+  renderTasksGrid(tasks, isCompleted = false) {
+    const grid = isCompleted ? this.elements.completedTasksGrid : this.elements.tasksGrid;
     const loading = this.elements.tasksLoading;
-    const empty = this.elements.tasksEmpty;
+    const empty = isCompleted ? this.elements.completedTasksEmpty : this.elements.tasksEmpty;
     
     if (!grid) return;
     
-    // Hide loading and empty states
-    if (loading) loading.style.display = 'none';
-    if (empty) empty.style.display = 'none';
+    // Hide loading (only for incomplete tasks section)
+    if (!isCompleted && loading) loading.style.display = 'none';
+    
+    // Hide/show empty state
+    if (empty) {
+      empty.style.display = tasks.length === 0 ? 'block' : 'none';
+    }
     
     if (tasks.length === 0) {
       grid.innerHTML = '';
-      if (empty) empty.style.display = 'block';
       return;
     }
     
     // Render task cards
     grid.innerHTML = tasks.map(task => this.createTaskCard(task)).join('');
-    
-    // Bind task card events
-    this.bindTaskCardEvents();
 
     // Mark completed visuals
     tasks.forEach(t => {
@@ -985,11 +1022,10 @@ class UIManager {
       statusText = 'Due Soon';
     }
     
-  const formattedDate = dueDate ? dueDate.toLocaleDateString() : '-';
+  const settings = loadSettings();
+  const formattedDate = dueDate ? formatDate(dueDate, settings.dateFormat || 'YYYY-MM-DD') : '-';
   const duration = parseFloat(task.duration);
-    const durationText = duration >= 1 ? 
-      `${duration} hour${duration !== 1 ? 's' : ''}` : 
-      `${Math.round(duration * 60)} minutes`;
+    const durationText = formatDuration(duration, settings.timeUnit);
     
     return `
       <div class="task-card ${statusClass}" data-task-id="${task.id}">
@@ -1040,13 +1076,17 @@ class UIManager {
    * Bind task card events
    */
   bindTaskCardEvents() {
+    // Remove old event listeners by cloning and replacing (prevents duplicates)
     document.querySelectorAll('.task-card').forEach(card => {
       const taskId = card.dataset.taskId;
       
       // Edit button
       const editBtn = card.querySelector('.edit-btn');
       if (editBtn) {
-        editBtn.addEventListener('click', () => {
+        // Clone to remove old listeners
+        const newEditBtn = editBtn.cloneNode(true);
+        editBtn.parentNode.replaceChild(newEditBtn, editBtn);
+        newEditBtn.addEventListener('click', () => {
           this.editTask(taskId);
         });
       }
@@ -1054,7 +1094,10 @@ class UIManager {
       // Delete button
       const deleteBtn = card.querySelector('.delete-btn');
       if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => {
+        // Clone to remove old listeners
+        const newDeleteBtn = deleteBtn.cloneNode(true);
+        deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
+        newDeleteBtn.addEventListener('click', () => {
           this.deleteTask(taskId);
         });
       }
@@ -1062,7 +1105,10 @@ class UIManager {
       // Completion checkbox
       const completeCheckbox = card.querySelector('.task-complete-checkbox');
       if (completeCheckbox) {
-        completeCheckbox.addEventListener('change', (e) => {
+        // Clone to remove old listeners
+        const newCheckbox = completeCheckbox.cloneNode(true);
+        completeCheckbox.parentNode.replaceChild(newCheckbox, completeCheckbox);
+        newCheckbox.addEventListener('change', (e) => {
           const checked = e.target.checked;
           // Capture task snapshot for toast
           const task = stateManager.getState('tasks').find(t => t.id === taskId) || { id: taskId, title: '' };
@@ -1078,8 +1124,34 @@ class UIManager {
    * @param {string} taskId - Task ID
    */
   editTask(taskId) {
-    uiActions.startEditingTask(taskId, stateManager);
-    this.navigateToSection('add-task');
+    try {
+      console.log('Editing task:', taskId);
+      uiActions.startEditingTask(taskId, stateManager);
+      
+      // Scroll to the add-task form
+      const addTaskSection = document.getElementById('add-task');
+      if (addTaskSection) {
+        console.log('Scrolling to add-task section');
+        addTaskSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+        
+        // Focus on the first input field after a short delay
+        setTimeout(() => {
+          const firstInput = addTaskSection.querySelector('input');
+          if (firstInput) {
+            console.log('Focusing first input');
+            firstInput.focus();
+          }
+        }, 500);
+      } else {
+        console.error('Add-task section not found');
+      }
+    } catch (error) {
+      console.error('Error editing task:', error);
+      this.showToast('Error loading task for editing', 'error');
+    }
   }
   
   /**
@@ -1117,10 +1189,19 @@ class UIManager {
     // Combine date and time (if provided) into an ISO-like datetime for storage/comparison
     const due = formData.date ? (formData.time ? `${formData.date}T${formData.time}` : String(formData.date)) : '';
 
+    // Convert duration to hours if user is in minutes mode (internally we store in hours)
+    const settings = loadSettings();
+    const timeUnit = settings.timeUnit || 'hours';
+    let duration = parseFloat(formData.duration) || 0;
+    if (timeUnit === 'minutes') {
+      // Convert minutes to hours for storage
+      duration = duration / 60;
+    }
+
     const payload = {
       title: formData.title,
       dueDate: due,
-      duration: formData.duration,
+      duration: duration,
       tag: formData.tag,
       description: formData.description
     };
@@ -1301,9 +1382,8 @@ class UIManager {
       this.elements.totalTasks.textContent = stats.totalTasks;
     }
     if (this.elements.totalDuration) {
-      const hours = Math.floor(stats.totalDuration);
-      const minutes = Math.round((stats.totalDuration - hours) * 60);
-      this.elements.totalDuration.textContent = `${hours}h ${minutes}m`;
+      const settings = loadSettings();
+      this.elements.totalDuration.textContent = formatDuration(stats.totalDuration, settings.timeUnit);
     }
     if (this.elements.topTag) {
       this.elements.topTag.textContent = stats.topTag || '-';
@@ -1435,16 +1515,32 @@ class UIManager {
     // Cap/target UI removed from homepage; update only if element exists on the current page
     if (!this.elements.capStatus) return;
     
+    const settings = loadSettings();
+    const timeUnit = settings.timeUnit || 'hours';
+    
+    // Update the unit label
+    const unitLabel = document.getElementById('cap-unit-label');
+    if (unitLabel) {
+      unitLabel.textContent = timeUnit;
+    }
+    
     const { currentWeekDuration, durationCap, capStatus, percentage } = capSettings;
     this.elements.capStatus.className = `cap-status ${capStatus}`;
+    
+    // Format remaining/exceeded time based on user preference
+    const remaining = durationCap - currentWeekDuration;
+    const exceeded = currentWeekDuration - durationCap;
+    const remainingText = formatDuration(remaining, timeUnit);
+    const exceededText = formatDuration(exceeded, timeUnit);
+    
     if (percentage > 100) {
-      this.elements.capStatus.textContent = `You've exceeded your weekly goal by ${(currentWeekDuration - durationCap).toFixed(1)} hours! (${percentage}%)`;
+      this.elements.capStatus.textContent = `You've exceeded your weekly goal by ${exceededText}! (${percentage}%)`;
       this.elements.capStatus.setAttribute('aria-live', 'assertive');
     } else if (percentage > 80) {
-      this.elements.capStatus.textContent = `You have accomplished ${percentage}% of your weekly goal! ${(durationCap - currentWeekDuration).toFixed(1)} hours remaining`;
+      this.elements.capStatus.textContent = `You have accomplished ${percentage}% of your weekly goal! ${remainingText} remaining`;
       this.elements.capStatus.setAttribute('aria-live', 'polite');
     } else {
-      this.elements.capStatus.textContent = `You have accomplished ${percentage}% of your weekly goal. ${(durationCap - currentWeekDuration).toFixed(1)} hours remaining`;
+      this.elements.capStatus.textContent = `You have accomplished ${percentage}% of your weekly goal. ${remainingText} remaining`;
       this.elements.capStatus.setAttribute('aria-live', 'polite');
     }
   }
@@ -1507,6 +1603,8 @@ class UIManager {
     });
 
     // Get weekly goal and compute completed hours
+    const settings = loadSettings();
+    const timeUnit = settings.timeUnit || 'hours';
     const capSettings = stateManager.getState('capSettings') || {};
     const weeklyGoal = capSettings.durationCap || stateManager.getState('settings')?.durationCap || 40;
     
@@ -1562,7 +1660,11 @@ class UIManager {
     ctx.font = '14px Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`${completedHours.toFixed(1)}h / ${weeklyGoal}h`, cx, cy);
+    
+    // Format values based on time unit preference
+    const completedText = formatDuration(completedHours, timeUnit);
+    const goalText = formatDuration(weeklyGoal, timeUnit);
+    ctx.fillText(`${completedText} / ${goalText}`, cx, cy);
 
     // Legend with color swatches
     ctx.font = '12px Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';

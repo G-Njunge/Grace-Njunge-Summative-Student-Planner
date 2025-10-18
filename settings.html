@@ -140,6 +140,11 @@
         box-shadow: 0 12px 36px rgba(0,0,0,0.45) !important;
         backdrop-filter: blur(10px) !important;
       }
+      
+      /* Hide the tagline on preferences page */
+      .tagline {
+        display: none !important;
+      }
     </style>
 </head>
 <body>
@@ -150,10 +155,8 @@
       <div class="nav-container">
         <div class="logo">
           <h1>
-            <span class="logo-icon">📚</span>
             <span class="logo-text">ORDERLY</span>
           </h1>
-          <p class="tagline">Your Academic Companion</p>
         </div>
         <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">
           <span></span>
@@ -161,11 +164,11 @@
           <span></span>
         </button>
         <ul class="nav-menu" role="menubar">
+          <li role="none"><a href="index.html#hero" role="menuitem" class="nav-link">Home</a></li>
           <li role="none"><a href="dashboard.html#dashboard" role="menuitem" class="nav-link">Dashboard</a></li>
           <li role="none"><a href="tasks.html#tasks" role="menuitem" class="nav-link">Tasks</a></li>
-          <li role="none"><a href="settings.html" role="menuitem" class="nav-link">Preferences</a></li>
+          <li role="none"><a href="settings.html" role="menuitem" class="nav-link">Settings</a></li>
           <li role="none"><a href="dashboard.html#about" role="menuitem" class="nav-link">About</a></li>
-          <li role="none"><a href="tests.html" role="menuitem" class="nav-link">Tests</a></li>
         </ul>
       </div>
     </nav>
@@ -174,12 +177,10 @@
   <main id="main-content" class="main" role="main">
     <section class="section" style="display:block;padding-top:120px;">
       <div class="container">
-        <h2 class="section-title">Preferences</h2>
-        <div class="welcome-message glass-effect" style="padding:1.5rem;margin-bottom:1.5rem;border-radius:1rem;text-align:center;">
-          <p style="font-size:1.5rem;font-weight:700;line-height:1.3;margin:0;">
-            <span style="background:linear-gradient(135deg, #ec4899, #db2777);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Welcome to Orderly</span><span style="color:rgba(255,255,255,0.95);">, please select your preferences for a superb experience with us!</span>
-          </p>
-        </div>
+        <h1 class="hero-title" style="font-size: clamp(2rem, 6vw, 3.5rem);font-weight:800;line-height:1.1;margin-bottom:3rem;text-align:center;">
+          <span class="hero-title-main" style="background:linear-gradient(135deg, #ec4899, #db2777);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:#ffffff;">Welcome to Orderly</span>
+          <span class="hero-title-sub" style="color:#ffffff;margin-top:0.5rem;">please select your preferences for a superb experience with us!</span>
+        </h1>
         <div class="settings-grid">
           <div class="settings-card glass-effect">
             <h3>Units & Display</h3>
@@ -198,6 +199,7 @@
                 <option value="MM/DD/YYYY">MM/DD/YYYY</option>
                 <option value="DD/MM/YYYY">DD/MM/YYYY</option>
               </select>
+              <p class="settings-description" id="date-format-example">Example: 2025-10-18</p>
             </div>
           </div>
           <div class="settings-card glass-effect">
@@ -209,12 +211,32 @@
               </label>
               <p class="settings-description">Get notified about upcoming deadlines</p>
             </div>
-            <div class="settings-group">
-              <label class="checkbox-label">
-                <input type="checkbox" id="goal-alerts" class="checkbox">
-                Goal achievement alerts
-              </label>
-              <p class="settings-description">Celebrate when you reach your weekly goals</p>
+            <div class="settings-group" id="email-input-group" style="display: none; margin-top: 1rem;">
+              <label for="reminder-email" class="settings-label">Email Address</label>
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                <div style="flex: 1;">
+                  <input 
+                    type="email" 
+                    id="reminder-email" 
+                    class="form-input" 
+                    placeholder="your.email@example.com"
+                    autocomplete="email"
+                    spellcheck="false"
+                    aria-describedby="email-error"
+                  >
+                  <p id="email-error" class="error-message" style="display: none; color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;"></p>
+                </div>
+                <button 
+                  type="button" 
+                  id="save-email-btn" 
+                  class="btn btn-primary"
+                  style="padding: 0.625rem 1.5rem; white-space: nowrap;"
+                >
+                  Save Email
+                </button>
+              </div>
+              <p id="email-success" class="success-message" style="display: none; color: #10b981; font-size: 0.875rem; margin-top: 0.5rem;"></p>
+              <p class="settings-description" style="margin-top: 0.5rem;">We'll send reminder notifications to this email</p>
             </div>
           </div>
         </div>
@@ -228,7 +250,7 @@
         <p>&copy; 2024 Campus Life Planner. Built with ❤️ for students everywhere.</p>
         <div class="footer-links">
           <a href="dashboard.html#about">About</a>
-          <a href="settings.html">Preferences</a>
+          <a href="settings.html">Settings</a>
           <a href="https://github.com/your-username" target="_blank" rel="noopener">GitHub</a>
         </div>
       </div>

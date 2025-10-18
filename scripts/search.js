@@ -440,7 +440,22 @@ export function filterTasks(tasks, filters) {
 export function sortTasks(tasks, sortBy) {
   const sortedTasks = [...tasks];
   
+  // Priority order based on Eisenhower Matrix
+  const priorityOrder = {
+    'Urgent & Important': 1,
+    'Important but Not Urgent': 2,
+    'Urgent but Not Important': 3,
+    'Neither Urgent nor Important': 4
+  };
+  
   switch (sortBy) {
+    case 'priority':
+      return sortedTasks.sort((a, b) => {
+        const priorityA = priorityOrder[a.tag] || 999;
+        const priorityB = priorityOrder[b.tag] || 999;
+        return priorityA - priorityB;
+      });
+    
     case 'title-asc':
       return sortedTasks.sort((a, b) => a.title.localeCompare(b.title));
     

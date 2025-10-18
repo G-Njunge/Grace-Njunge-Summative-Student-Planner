@@ -72,9 +72,9 @@ export const VALIDATION_RULES = {
   },
   
   tag: {
-    pattern: /^[A-Za-z]+(?:[ -][A-Za-z]+)*$/,
-    message: 'Tag must contain only letters, spaces, and hyphens',
-    test: (value) => value && value.trim().length > 0 && value.length <= 50
+    pattern: /^[\w\s&(),-]+$/,
+    message: 'Priority must be selected from the dropdown',
+    test: (value) => value && value.trim().length > 0 && value.length <= 100
   },
   
   description: {

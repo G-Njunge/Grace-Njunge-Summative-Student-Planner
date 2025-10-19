@@ -460,6 +460,52 @@ class CampusLifePlanner {
         return;
       }
       
+      // Arrow key navigation for nav menu
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const navLinks = Array.from(document.querySelectorAll('.nav-menu .nav-link'));
+        const currentIndex = navLinks.indexOf(document.activeElement);
+        
+        if (currentIndex !== -1) {
+          e.preventDefault();
+          let nextIndex;
+          
+          if (e.key === 'ArrowRight') {
+            nextIndex = (currentIndex + 1) % navLinks.length;
+          } else {
+            nextIndex = (currentIndex - 1 + navLinks.length) % navLinks.length;
+          }
+          
+          navLinks[nextIndex].focus();
+        }
+      }
+      
+      // Arrow key navigation for task cards
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const taskCards = Array.from(document.querySelectorAll('.task-card'));
+        const currentIndex = taskCards.findIndex(card => card.contains(document.activeElement));
+        
+        if (currentIndex !== -1) {
+          e.preventDefault();
+          let nextIndex;
+          
+          if (e.key === 'ArrowDown') {
+            nextIndex = Math.min(currentIndex + 1, taskCards.length - 1);
+          } else {
+            nextIndex = Math.max(currentIndex - 1, 0);
+          }
+          
+          // Focus the first focusable element in the next card
+          const nextCard = taskCards[nextIndex];
+          const focusableElement = nextCard.querySelector('button, a, [tabindex="0"]');
+          if (focusableElement) {
+            focusableElement.focus();
+          } else {
+            nextCard.setAttribute('tabindex', '0');
+            nextCard.focus();
+          }
+        }
+      }
+      
       // Alt + N: New task
       if (e.altKey && e.key === 'n') {
         e.preventDefault();

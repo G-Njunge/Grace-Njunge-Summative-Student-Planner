@@ -3,15 +3,15 @@
 
 /* ===== CSS CUSTOM PROPERTIES ===== */
 :root {
-  /* Check Me Inspired Color Palette */
-  --primary-color: #ec4899;
-  --primary-light: #f472b6;
-  --primary-dark: #db2777;
-  --secondary-color: #f97316;
-  --accent-color: #ec4899;
-  --pink-light: #fce7f3;
-  --pink-medium: #f9a8d4;
-  --pink-dark: #be185d;
+  /* Orange Color Palette */
+  --primary-color: #f97316;
+  --primary-light: #fb923c;
+  --primary-dark: #ea580c;
+  --secondary-color: #ff6b35;
+  --accent-color: #f97316;
+  --pink-light: #fed7aa;
+  --pink-medium: #fdba74;
+  --pink-dark: #c2410c;
   
   /* Dark theme colors */
   --dark-bg: #1a1d2e;
@@ -413,7 +413,7 @@ html {
   transform: translate(-50%, -50%);
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.15), transparent);
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.15), transparent);
   border-radius: 50%;
   animation: float 6s ease-in-out infinite;
 }
@@ -425,7 +425,7 @@ html {
   left: -10%;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.1), transparent);
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.1), transparent);
   border-radius: 50%;
   animation: float 8s ease-in-out infinite reverse;
 }
@@ -607,7 +607,7 @@ html {
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-2xl);
-  box-shadow: 0 10px 30px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 10px 30px rgba(249, 115, 22, 0.3);
   animation: float 6s ease-in-out infinite;
 }
 
@@ -745,7 +745,7 @@ html {
   font-weight: 700;
   color: var(--white);
   margin: 0 auto var(--space-6);
-  box-shadow: 0 10px 30px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 10px 30px rgba(249, 115, 22, 0.3);
 }
 
 .step-card h3 {
@@ -880,7 +880,7 @@ html {
 
 .cap-input:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
 .cap-status {
@@ -1464,7 +1464,7 @@ select option:checked {
   width: 100%;
   height: auto;
   border-radius: 1rem;
-  box-shadow: 0 10px 25px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 10px 25px rgba(249, 115, 22, 0.3);
   border: 3px solid var(--primary-light);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   background: white;
@@ -1472,7 +1472,7 @@ select option:checked {
 
 .profile-pic:hover {
   transform: scale(1.05);
-  box-shadow: 0 15px 35px rgba(236, 72, 153, 0.4);
+  box-shadow: 0 15px 35px rgba(249, 115, 22, 0.4);
 }
 
 .developer-bio h3 {

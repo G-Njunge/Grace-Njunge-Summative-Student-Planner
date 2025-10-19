@@ -408,8 +408,9 @@ html {
 .hero-section::before {
   content: '';
   position: absolute;
-  top: -20%;
-  right: -10%;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 600px;
   height: 600px;
   background: radial-gradient(circle, rgba(236, 72, 153, 0.15), transparent);
@@ -611,21 +612,51 @@ html {
 }
 
 .floating-icon:nth-child(1) {
-  top: 20%;
-  right: -10%;
+  top: 5%;
+  right: 5%;
   animation-delay: 0s;
 }
 
 .floating-icon:nth-child(2) {
-  bottom: 30%;
-  left: -15%;
+  top: 5%;
+  right: 12%;
   animation-delay: 2s;
 }
 
 .floating-icon:nth-child(3) {
-  top: 60%;
-  right: -20%;
+  top: 12%;
+  right: 5%;
   animation-delay: 4s;
+}
+
+.floating-icon:nth-child(4) {
+  top: 12%;
+  right: 12%;
+  animation-delay: 1s;
+}
+
+.floating-icon:nth-child(5) {
+  top: 5%;
+  left: 5%;
+  animation-delay: 3s;
+}
+
+.floating-icon:nth-child(6) {
+  top: 5%;
+  left: 12%;
+  animation-delay: 5s;
+}
+
+.floating-icon:nth-child(7) {
+  top: 12%;
+  left: 5%;
+  animation-delay: 2.5s;
+}
+
+.floating-icon:nth-child(8) {
+  top: 12%;
+  left: 12%;
+  animation-delay: 4.5s;
 }
 
 @keyframes float {

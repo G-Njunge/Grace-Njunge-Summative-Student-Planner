@@ -9,7 +9,6 @@ import { initializeState, stateManager, uiActions } from './state.js';
 import { initializeUI, uiManager } from './ui.js';
 import { searchManager } from './search.js';
 import { loadSettings, saveSettings } from './storage.js';
-import { isValidEmail, getEmailValidationError } from './email-validator.js';
 
 /**
  * Update date format example display
@@ -74,9 +73,6 @@ function initializeTaskForm() {
 function initializeSettingsPage() {
   const timeUnitSelect = document.getElementById('time-unit');
   const dateFormatSelect = document.getElementById('date-format');
-  const dueRemindersCheckbox = document.getElementById('due-reminders');
-  const emailInputGroup = document.getElementById('email-input-group');
-  const emailInput = document.getElementById('reminder-email');
   
   if (!timeUnitSelect) return; // Not on settings page
   
@@ -86,23 +82,6 @@ function initializeSettingsPage() {
   // Set current values
   timeUnitSelect.value = settings.timeUnit || 'hours';
   dateFormatSelect.value = settings.dateFormat || 'YYYY-MM-DD';
-  dueRemindersCheckbox.checked = settings.dueReminders !== false;
-  
-  // Set email value if exists
-  if (emailInput && settings.reminderEmail) {
-    emailInput.value = settings.reminderEmail;
-    // Show success message if email is already saved
-    const emailSuccess = document.getElementById('email-success');
-    if (emailSuccess) {
-      emailSuccess.textContent = 'Email saved successfully';
-      emailSuccess.style.display = 'flex';
-    }
-  }
-  
-  // Show/hide email input based on checkbox state
-  if (emailInputGroup) {
-    emailInputGroup.style.display = settings.dueReminders !== false ? 'block' : 'none';
-  }
   
   // Update date format example
   updateDateFormatExample(settings.dateFormat || 'YYYY-MM-DD');
@@ -200,117 +179,6 @@ function initializeSettingsPage() {
       window.uiManager.showToast('Date format preference updated successfully', 'success');
     }
   });
-  
-  dueRemindersCheckbox.addEventListener('change', (e) => {
-    const isChecked = e.target.checked;
-    
-    // Show/hide email input
-    if (emailInputGroup) {
-      emailInputGroup.style.display = isChecked ? 'block' : 'none';
-    }
-    
-    // Save preference
-    const currentSettings = loadSettings();
-    const newSettings = { ...currentSettings, dueReminders: isChecked };
-    
-    // If unchecking, remove email from settings
-    if (!isChecked) {
-      delete newSettings.reminderEmail;
-      if (emailInput) {
-        emailInput.value = '';
-      }
-    }
-    
-    saveSettings(newSettings);
-    console.log('Due reminders preference updated to:', isChecked);
-    
-    if (window.uiManager && window.uiManager.showToast) {
-      window.uiManager.showToast('Notification preferences updated', 'success');
-    }
-  });
-  
-  // Handle Save Email button click
-  const saveEmailBtn = document.getElementById('save-email-btn');
-  const emailError = document.getElementById('email-error');
-  const emailSuccess = document.getElementById('email-success');
-  
-  if (saveEmailBtn && emailInput) {
-    saveEmailBtn.addEventListener('click', () => {
-      const email = emailInput.value.trim();
-      
-      // Hide previous messages
-      if (emailError) {
-        emailError.style.display = 'none';
-        emailError.textContent = '';
-      }
-      if (emailSuccess) {
-        emailSuccess.style.display = 'none';
-        emailSuccess.textContent = '';
-      }
-      
-      // Remove previous validation classes
-      emailInput.classList.remove('error', 'success');
-      
-      // Validate email
-      if (!email) {
-        emailInput.classList.add('error');
-        if (emailError) {
-          emailError.textContent = 'Email address is required';
-          emailError.style.display = 'flex';
-        }
-        return;
-      }
-      
-      if (!isValidEmail(email)) {
-        emailInput.classList.add('error');
-        if (emailError) {
-          // Get specific error message
-          const errorMsg = getEmailValidationError(email);
-          emailError.textContent = errorMsg || 'Please enter a valid email address';
-          emailError.style.display = 'flex';
-        }
-        return;
-      }
-      
-      // Email is valid - save it
-      emailInput.classList.add('success');
-      const newSettings = { ...loadSettings(), reminderEmail: email.toLowerCase() };
-      saveSettings(newSettings);
-      console.log('Reminder email saved:', email);
-      
-      // Show success message
-      if (emailSuccess) {
-        emailSuccess.textContent = 'Email saved successfully';
-        emailSuccess.style.display = 'flex';
-      }
-      
-      if (window.uiManager && window.uiManager.showToast) {
-        window.uiManager.showToast('Email address saved successfully', 'success');
-      }
-    });
-    
-    // Allow Enter key to save email
-    emailInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        saveEmailBtn.click();
-      }
-    });
-    
-    // Clear error when user starts typing
-    emailInput.addEventListener('input', () => {
-      if (emailError && emailError.style.display !== 'none') {
-        emailError.style.display = 'none';
-        emailError.textContent = '';
-        emailInput.classList.remove('error');
-      }
-      if (emailSuccess && emailSuccess.style.display !== 'none') {
-        emailSuccess.style.display = 'none';
-        emailSuccess.textContent = '';
-        emailInput.classList.remove('success');
-      }
-    });
-  }
 }
 
 /**

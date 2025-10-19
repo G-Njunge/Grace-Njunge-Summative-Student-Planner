@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orderly • Preferences</title>
     <meta name="description" content="Orderly preferences and settings">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="preload" href="styles/main.css" as="style">
     <link rel="modulepreload" href="scripts/main.js">
     <link rel="stylesheet" href="styles/main.css">
@@ -202,43 +205,6 @@
               <p class="settings-description" id="date-format-example">Example: 2025-10-18</p>
             </div>
           </div>
-          <div class="settings-card glass-effect">
-            <h3>Notifications</h3>
-            <div class="settings-group">
-              <label class="checkbox-label">
-                <input type="checkbox" id="due-reminders" class="checkbox">
-                Due date reminders
-              </label>
-              <p class="settings-description">Get notified about upcoming deadlines</p>
-            </div>
-            <div class="settings-group" id="email-input-group" style="display: none; margin-top: 1rem;">
-              <label for="reminder-email" class="settings-label">Email Address</label>
-              <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
-                <div style="flex: 1;">
-                  <input 
-                    type="email" 
-                    id="reminder-email" 
-                    class="form-input" 
-                    placeholder="your.email@example.com"
-                    autocomplete="email"
-                    spellcheck="false"
-                    aria-describedby="email-error"
-                  >
-                  <p id="email-error" class="error-message" style="display: none; color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;"></p>
-                </div>
-                <button 
-                  type="button" 
-                  id="save-email-btn" 
-                  class="btn btn-primary"
-                  style="padding: 0.625rem 1.5rem; white-space: nowrap;"
-                >
-                  Save Email
-                </button>
-              </div>
-              <p id="email-success" class="success-message" style="display: none; color: #10b981; font-size: 0.875rem; margin-top: 0.5rem;"></p>
-              <p class="settings-description" style="margin-top: 0.5rem;">We'll send reminder notifications to this email</p>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -247,12 +213,7 @@
   <footer class="footer" role="contentinfo">
     <div class="container">
       <div class="footer-content">
-        <p>&copy; 2024 Campus Life Planner. Built with ❤️ for students everywhere.</p>
-        <div class="footer-links">
-          <a href="dashboard.html#about">About</a>
-          <a href="settings.html">Settings</a>
-          <a href="https://github.com/your-username" target="_blank" rel="noopener">GitHub</a>
-        </div>
+        <p>&copy; 2025 Orderly. Built with love for students everywhere.</p>
       </div>
     </div>
   </footer>

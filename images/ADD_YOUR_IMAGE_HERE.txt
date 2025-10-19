@@ -1,0 +1,18 @@
+TO ADD YOUR PROFILE PICTURE:
+============================
+
+1. Copy your profile image file to this folder (images/)
+2. Rename it to: grace-njunge.jpg
+3. The image will automatically appear on the About page
+
+Current image path expected:
+images/grace-njunge.jpg
+
+Supported formats: .jpg, .jpeg, .png
+
+Your image source location:
+c:\Users\san\AppData\Local\Packages\5319275A.WhatsAppDesktop_cv1g1gvanyjgm\TempState\972E236A9BAC1EA37984C33FEF8E3CDE\WhatsApp Image 2025-10-18 at 14.59.44_437a814c.jpg
+
+PowerShell command to copy:
+Copy-Item "c:\Users\san\AppData\Local\Packages\5319275A.WhatsAppDesktop_cv1g1gvanyjgm\TempState\972E236A9BAC1EA37984C33FEF8E3CDE\WhatsApp Image 2025-10-18 at 14.59.44_437a814c.jpg" "images\grace-njunge.jpg"
+c:\Users\san\Downloads\grace-njunge.jpg.jpg

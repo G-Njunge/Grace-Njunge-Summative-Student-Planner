@@ -1,33 +1,27 @@
-# 📚 Campus Life Planner
+# Campus Life Planner
+
+**Deployment Link:** https://g-njunge.github.io/Grace-Njunge-Summative-Student-Planner/
 
 **Your Academic Journey Companion**
 
 A responsive, accessible web application for managing academic tasks, events, and deadlines. Built with vanilla HTML, CSS, and JavaScript, featuring advanced regex validation, comprehensive search functionality, and modern glass-morphism design inspired by the Check Me app.
 
-![Campus Life Planner](https://img.shields.io/badge/Version-1.0.0-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Accessibility](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-brightgreen)
+## Table of Contents
 
-## 🚀 Live Demo
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Architecture](#architecture)
+- [Regex Patterns](#regex-patterns)
+- [Keyboard Navigation](#keyboard-navigation)
+- [Accessibility](#accessibility)
+- [Testing](#testing)
+- [Browser Support](#browser-support)
+- [Contributing](#contributing)
+- [License](#license)
 
-[**View Live Application**](https://your-username.github.io/Campus-Life)
-
-## 📋 Table of Contents
-
-- [Features](#-features)
-- [Getting Started](#-getting-started)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Architecture](#-architecture)
-- [Regex Patterns](#-regex-patterns)
-- [Keyboard Navigation](#-keyboard-navigation)
-- [Accessibility](#-accessibility)
-- [Testing](#-testing)
-- [Browser Support](#-browser-support)
-- [Contributing](#-contributing)
-- [License](#-license)
-
-## ✨ Features
+## Features
 
 ### Core Functionality
 - **Task Management**: Create, edit, delete, and organize academic tasks
@@ -54,7 +48,7 @@ A responsive, accessible web application for managing academic tasks, events, an
 - **Dark Mode Ready**: CSS custom properties for theme switching
 - **Print Styles**: Optimized printing layouts
 
-## 🛠 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Modern web browser (Chrome 80+, Firefox 75+, Safari 13+, Edge 80+)
@@ -66,7 +60,7 @@ A responsive, accessible web application for managing academic tasks, events, an
 2. Open `index.html` in your web browser
 3. Start adding your academic tasks!
 
-## 📦 Installation
+## Installation
 
 ### Option 1: Direct Download
 ```bash
@@ -99,7 +93,7 @@ php -S localhost:8000
 
 Then visit `http://localhost:8000`
 
-## 🎯 Usage
+## Usage
 
 ### Adding Tasks
 1. Navigate to "Add Task" section
@@ -129,7 +123,7 @@ Then visit `http://localhost:8000`
 - **Import**: Upload previously exported data
 - **Clear Data**: Remove all tasks (with confirmation)
 
-## 🏗 Architecture
+## Architecture
 
 ### File Structure
 ```
@@ -160,23 +154,23 @@ Campus-Life/
 - **Event-Driven**: Pub/sub pattern for component communication
 - **Error Handling**: Comprehensive error catching and user feedback
 
-## 🔍 Regex Patterns
+## Regex Patterns
 
 ### Basic Validation Patterns
 | Pattern | Purpose | Example |
 |---------|---------|---------|
-| `/^\S(?:.*\S)?$/` | Title validation (no leading/trailing spaces) | `"Valid Title"` ✅ |
-| `/^(0\|[1-9]\d*)(\.\d{1,2})?$/` | Duration validation (positive numbers) | `"2.5"` ✅ |
-| `/^\d{4}-(0[1-9]\|1[0-2])-(0[1-9]\|[12]\d\|3[01])$/` | Date validation (YYYY-MM-DD) | `"2024-12-25"` ✅ |
-| `/^[A-Za-z]+(?:[ -][A-Za-z]+)*$/` | Tag validation (letters, spaces, hyphens) | `"Math-Homework"` ✅ |
+| `/^\S(?:.*\S)?$/` | Title validation (no leading/trailing spaces) | `"Valid Title"` |
+| `/^(0\|[1-9]\d*)(\.\d{1,2})?$/` | Duration validation (positive numbers) | `"2.5"` |
+| `/^\d{4}-(0[1-9]\|1[0-2])-(0[1-9]\|[12]\d\|3[01])$/` | Date validation (YYYY-MM-DD) | `"2024-12-25"` |
+| `/^[A-Za-z]+(?:[ -][A-Za-z]+)*$/` | Tag validation (letters, spaces, hyphens) | `"Math-Homework"` |
 
 ### Advanced Patterns
 | Pattern | Purpose | Example |
 |---------|---------|---------|
-| `/\b(\w+)\s+\1\b/` | Duplicate word detection (back-reference) | `"the the quick"` → finds "the the" |
-| `/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/` | Strong password (lookahead) | `"MyStr0ng!Pass"` ✅ |
-| `/^[a-zA-Z0-9.!#$%&'*+/=?^_`{\|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/` | Email validation | `"user@example.com"` ✅ |
-| `/^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/` | URL validation | `"https://example.com"` ✅ |
+| `/\b(\w+)\s+\1\b/` | Duplicate word detection (back-reference) | `"the the quick"` finds "the the" |
+| `/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/` | Strong password (lookahead) | `"MyStr0ng!Pass"` |
+| `/^[a-zA-Z0-9.!#$%&'*+/=?^_`{\|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/` | Email validation | `"user@example.com"` |
+| `/^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/` | URL validation | `"https://example.com"` |
 
 ### Search Patterns
 - **Time Format**: `\b([0-1]?[0-9]\|2[0-3]):[0-5][0-9]\b` - Find time patterns (14:30)
@@ -184,7 +178,7 @@ Campus-Life/
 - **Hashtags**: `#\w+` - Find hashtag patterns (#homework)
 - **Mentions**: `@\w+` - Find mention patterns (@professor)
 
-## ⌨️ Keyboard Navigation
+## Keyboard Navigation
 
 ### Global Shortcuts
 | Shortcut | Action |
@@ -209,7 +203,7 @@ Campus-Life/
 - **Enter**: Submit forms (when appropriate)
 - **Escape**: Cancel form editing
 
-## ♿ Accessibility
+## Accessibility
 
 ### WCAG 2.1 AA Compliance
 - **Semantic HTML**: Proper landmarks and heading hierarchy
@@ -232,7 +226,7 @@ Campus-Life/
 - **Navigation Landmarks**: Clear page structure
 - **Form Validation**: Accessible error messaging
 
-## 🧪 Testing
+## Testing
 
 ### Running Tests
 1. Open `tests.html` in your browser
@@ -253,22 +247,22 @@ Campus-Life/
 5. **UI Tests**: User interface functionality
 
 ### Manual Testing Checklist
-- [ ] Task creation and editing
-- [ ] Search and filtering
-- [ ] Data import/export
-- [ ] Responsive design
-- [ ] Keyboard navigation
-- [ ] Screen reader compatibility
-- [ ] Error handling
-- [ ] Form validation
+- Task creation and editing
+- Search and filtering
+- Data import/export
+- Responsive design
+- Keyboard navigation
+- Screen reader compatibility
+- Error handling
+- Form validation
 
-## 🌐 Browser Support
+## Browser Support
 
 ### Supported Browsers
-- **Chrome**: 80+ ✅
-- **Firefox**: 75+ ✅
-- **Safari**: 13+ ✅
-- **Edge**: 80+ ✅
+- **Chrome**: 80+
+- **Firefox**: 75+
+- **Safari**: 13+
+- **Edge**: 80+
 
 ### Required Features
 - ES6 Modules
@@ -283,7 +277,7 @@ Campus-Life/
 - Enhanced features require modern browser support
 - Graceful degradation for older browsers
 
-## 📱 Responsive Design
+## Responsive Design
 
 ### Breakpoints
 - **Mobile**: 320px - 767px
@@ -303,7 +297,7 @@ Campus-Life/
 - Task lists and summaries
 - No unnecessary elements
 
-## 🔧 Development
+## Development
 
 ### Setup Development Environment
 ```bash
@@ -332,7 +326,7 @@ open http://localhost:8000
 5. Ensure accessibility compliance
 6. Submit a pull request
 
-## 📊 Performance
+## Performance
 
 ### Optimization Features
 - **Lazy Loading**: Deferred loading of non-critical resources
@@ -346,7 +340,7 @@ open http://localhost:8000
 - **Cumulative Layout Shift**: < 0.1
 - **First Input Delay**: < 100ms
 
-## 🔒 Security
+## Security
 
 ### Security Features
 - **Input Sanitization**: XSS prevention
@@ -359,11 +353,11 @@ open http://localhost:8000
 - **Local Storage**: All data stays on user's device
 - **No External Requests**: Fully self-contained
 
-## 🚀 Deployment
+## Deployment
 
 ### GitHub Pages
 1. Fork this repository
-2. Go to Settings → Pages
+2. Go to Settings then Pages
 3. Select source branch (main)
 4. Access via `https://your-username.github.io/Campus-Life`
 
@@ -373,7 +367,7 @@ open http://localhost:8000
 - **Firebase Hosting**: Google's hosting platform
 - **AWS S3**: Static website hosting
 
-## 📝 Changelog
+## Changelog
 
 ### Version 1.0.0 (Current)
 - Initial release
@@ -386,44 +380,42 @@ open http://localhost:8000
 - Statistics dashboard
 - Goal setting and tracking
 
-## 🤝 Contributing
+## Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our Contributing Guidelines for details.
 
 ### Ways to Contribute
-- 🐛 Bug reports
-- ✨ Feature requests
-- 📝 Documentation improvements
-- 🧪 Test coverage
-- ♿ Accessibility enhancements
-- 🎨 UI/UX improvements
+- Bug reports
+- Feature requests
+- Documentation improvements
+- Test coverage
+- Accessibility enhancements
+- UI/UX improvements
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 👥 Credits
+## Credits
 
 - **Design Inspiration**: Check Me app (https://checkme-app.com)
 - **Icons**: Unicode emojis and symbols
 - **Fonts**: System fonts for optimal performance
 - **Color Palette**: Custom design system
 
-## 📞 Support
+## Support
 
-- **Issues**: [GitHub Issues](https://github.com/your-username/Campus-Life/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/Campus-Life/discussions)
+- **Issues**: GitHub Issues
+- **Discussions**: GitHub Discussions
 - **Email**: your-email@example.com
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - WCAG 2.1 guidelines for accessibility standards
 - MDN Web Docs for browser compatibility information
 - Modern CSS techniques and best practices
 - JavaScript ES6+ features and patterns
 
----
-
-**Built with ❤️ for students everywhere**
+**Built with love for students everywhere**
 
 *Campus Life Planner - Making academic life more organized and accessible*

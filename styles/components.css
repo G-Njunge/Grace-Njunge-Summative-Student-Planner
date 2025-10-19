@@ -82,8 +82,9 @@
 
 .tasks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--space-6);
+  justify-items: center;
 }
 
 @media (max-width: 767px) {
@@ -102,6 +103,8 @@
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
+  width: 100%;
+  max-width: 350px;
 }
 
 .task-card:hover {

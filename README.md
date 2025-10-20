@@ -4,6 +4,8 @@
 
 YouTube Demo link - https://youtu.be/VNPVC7Ffj9c
 
+Link to Wireframes - https://drive.google.com/drive/folders/1x8iQZu7aeeGlH4rkHxUUVjC6JsP-yGkd?usp=drive_link
+
 **Your Academic Journey Companion**
 
 A responsive, accessible web application for managing academic tasks, events, and deadlines. Built with vanilla HTML, CSS, and JavaScript, featuring advanced regex validation, comprehensive search functionality, and modern glass-morphism design inspired by the Check Me app.

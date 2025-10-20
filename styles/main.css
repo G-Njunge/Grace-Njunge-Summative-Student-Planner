@@ -385,7 +385,7 @@ html {
 
 .nav-link.active {
   color: var(--white);
-  background-color: rgba(255, 255, 255, 0.15);
+  border-bottom: 3px solid var(--primary-color);
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -715,15 +715,17 @@ html {
 }
 
 .task-preview-title {
-  font-weight: 500;
-  color: var(--gray-800);
+  font-weight: 600;
+  color: var(--gray-900);
+  font-size: var(--font-size-base);
 }
 
 .task-preview-meta {
   display: flex;
   gap: var(--space-3);
   font-size: var(--font-size-sm);
-  color: var(--gray-600);
+  color: var(--gray-700);
+  font-weight: 500;
 }
 
 
@@ -933,12 +935,13 @@ html {
 
 /* Longer tasks appear slightly more prominent */
 .todays-task .task-preview-meta {
-  color: rgba(255,255,255,0.8);
+  color: rgba(255,255,255,0.95);
+  font-weight: 600;
 }
 
 .todays-task[data-duration-long="true"] {
-  background: rgba(236,72,153,0.08);
-  border-color: rgba(236,72,153,0.14);
+  background: rgba(249, 115, 22, 0.12);
+  border-color: rgba(249, 115, 22, 0.25);
 }
 
 /* Today's Tasks list styles */
@@ -957,13 +960,13 @@ html {
   gap: var(--space-4);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 
 .todays-list-item[data-duration-long="true"] {
-  background: rgba(236,72,153,0.06);
-  border-color: rgba(236,72,153,0.12);
+  background: rgba(249, 115, 22, 0.12);
+  border-color: rgba(249, 115, 22, 0.25);
 }
 
 .todays-checkbox input[type="checkbox"] {
@@ -976,14 +979,27 @@ html {
   min-width: 0;
 }
 
-.duration-badge {
-  background: rgba(0,0,0,0.25);
-  color: var(--white);
-  padding: 6px 10px;
-  border-radius: 999px;
+.todays-content .task-preview-title {
+  color: rgba(255, 255, 255, 0.95);
   font-weight: 600;
+  font-size: 1rem;
+}
+
+.todays-content .task-preview-meta {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.duration-badge {
+  background: rgba(249, 115, 22, 0.9);
+  color: var(--white);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
   font-size: 0.9rem;
   white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Recent dropdown removed */
@@ -1015,15 +1031,17 @@ html {
 }
 
 .task-preview-title {
-  font-weight: 500;
-  color: var(--gray-800);
+  font-weight: 600;
+  color: var(--gray-900);
+  font-size: var(--font-size-base);
 }
 
 .task-preview-meta {
   display: flex;
   gap: var(--space-3);
   font-size: var(--font-size-sm);
-  color: var(--gray-600);
+  color: var(--gray-700);
+  font-weight: 500;
 }
 
 /* recent-tasks removed */

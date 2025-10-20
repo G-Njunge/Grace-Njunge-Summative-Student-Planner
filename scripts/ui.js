@@ -747,6 +747,30 @@ class UIManager {
    * @param {string} section - Section name
    */
   showSection(section) {
+    // Special handling for add-task which is inside tasks section
+    if (section === 'add-task') {
+      const tasksSection = document.getElementById('tasks');
+      const addTaskContainer = document.getElementById('add-task');
+      
+      if (tasksSection && addTaskContainer) {
+        // Make sure tasks section is visible
+        tasksSection.classList.add('active');
+        
+        // Scroll to add-task form
+        addTaskContainer.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+        
+        // Focus first input field
+        const firstInput = addTaskContainer.querySelector('input, select, textarea');
+        if (firstInput) {
+          setTimeout(() => firstInput.focus(), 500);
+        }
+      }
+      return;
+    }
+    
     // Hide all top-level sections
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
 
@@ -1437,7 +1461,7 @@ class UIManager {
   }
 
   /**
-   * Render Today's Tasks panel: tasks due today, sorted by duration desc
+   * Render Today's Tasks panel: tasks due today, sorted by priority (Eisenhower Matrix)
    */
   renderTodaysTasks() {
     const container = document.getElementById('todays-tasks-list');
@@ -1449,8 +1473,22 @@ class UIManager {
     // Filter tasks due today and not deleted
     const todays = tasks.filter(t => t.dueDate && String(t.dueDate).startsWith(todayStr));
 
-    // Sort by due datetime ascending (earlier first). If no time provided, date-only tasks come after timed tasks for the same day.
+    // Sort by priority first (Eisenhower Matrix), then by due time
+    const priorityOrder = {
+      'Urgent & Important': 1,
+      'Important but Not Urgent': 2,
+      'Urgent but Not Important': 3
+    };
+    
     todays.sort((a, b) => {
+      // First, sort by priority
+      const priorityA = priorityOrder[a.tag] || 999;
+      const priorityB = priorityOrder[b.tag] || 999;
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+      
+      // Then, sort by due datetime ascending (earlier first)
       const aDt = a.dueDate ? new Date(a.dueDate) : null;
       const bDt = b.dueDate ? new Date(b.dueDate) : null;
 
@@ -1880,11 +1918,22 @@ class UIManager {
     if (editingTaskId) {
       const task = stateManager.getState('currentTask');
       if (task) {
+        // Get user's time unit preference
+        const settings = loadSettings();
+        const timeUnit = settings.timeUnit || 'hours';
+        
+        // Convert duration from hours (stored) to user's preferred unit
+        let displayDuration = task.duration;
+        if (timeUnit === 'minutes' && task.duration) {
+          // Convert hours to minutes
+          displayDuration = task.duration * 60;
+        }
+        
         // Populate form
         if (this.elements.taskTitle) this.elements.taskTitle.value = task.title;
   if (this.elements.taskDueDate) this.elements.taskDueDate.value = task.dueDate ? String(task.dueDate).split('T')[0] : '';
   if (this.elements.taskDueTime) this.elements.taskDueTime.value = task.dueDate && String(task.dueDate).includes('T') ? String(task.dueDate).split('T')[1].slice(0,5) : '';
-        if (this.elements.taskDuration) this.elements.taskDuration.value = task.duration;
+        if (this.elements.taskDuration) this.elements.taskDuration.value = displayDuration;
         if (this.elements.taskTag) this.elements.taskTag.value = task.tag;
         if (this.elements.taskDescription) this.elements.taskDescription.value = task.description || '';
         

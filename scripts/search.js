@@ -444,8 +444,7 @@ export function sortTasks(tasks, sortBy) {
   const priorityOrder = {
     'Urgent & Important': 1,
     'Important but Not Urgent': 2,
-    'Urgent but Not Important': 3,
-    'Neither Urgent nor Important': 4
+    'Urgent but Not Important': 3
   };
   
   switch (sortBy) {

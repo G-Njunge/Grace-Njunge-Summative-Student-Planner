@@ -266,6 +266,14 @@ class CampusLifePlanner {
         console.error('Task form initialization failed:', err);
       }
 
+      // Set active navigation link
+      try {
+        this.setActiveNavLink();
+        console.log('Active navigation link set');
+      } catch (err) {
+        console.error('Active nav link setup failed:', err);
+      }
+
       // Setup performance monitoring
       try {
         this.setupPerformanceMonitoring();
@@ -297,6 +305,30 @@ class CampusLifePlanner {
     // Listen for tasks changes to update search index
     stateManager.subscribe('tasks', (tasks) => {
       searchManager.initialize(tasks);
+    });
+  }
+  
+  /**
+   * Set active navigation link based on current page
+   */
+  setActiveNavLink() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const currentPage = window.location.pathname;
+    
+    navLinks.forEach(link => {
+      // Get the href attribute and extract the filename
+      const linkHref = link.getAttribute('href');
+      
+      if (linkHref) {
+        // Check if current page ends with this link's href
+        // or if both are the root/index
+        if (currentPage.endsWith(linkHref) || 
+            (linkHref === 'index.html' && (currentPage.endsWith('/') || currentPage.endsWith('index.html')))) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      }
     });
   }
   

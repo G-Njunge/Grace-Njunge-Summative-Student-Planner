@@ -1,7 +1,8 @@
 # Campus Life Planner
 
 **Deployment Link:** https://g-njunge.github.io/Grace-Njunge-Summative-Student-Planner/
-YouTuve Demo link - https://youtu.be/VNPVC7Ffj9c
+
+YouTube Demo link - https://youtu.be/VNPVC7Ffj9c
 
 **Your Academic Journey Companion**
 

@@ -23,50 +23,21 @@ export function generateTimestamp() {
 }
 
 /**
- * Load tasks from localStorage with fallback mechanisms
+ * Load tasks from localStorage
  * @returns {Array} Array of task objects
  */
 export function loadTasks() {
   try {
-    // Try loading from localStorage first
     const data = localStorage.getItem(STORAGE_KEY);
-    if (data) {
-      const tasks = JSON.parse(data);
-      if (Array.isArray(tasks) && tasks.length > 0) {
-        return tasks;
-      }
-    }
-    
-    // If localStorage is empty, try sessionStorage backup
-    const backupData = sessionStorage.getItem(STORAGE_KEY + '_backup');
-    if (backupData) {
-      const backupTasks = JSON.parse(backupData);
-      if (Array.isArray(backupTasks) && backupTasks.length > 0) {
-        console.info('Loaded tasks from sessionStorage backup');
-        // Save back to localStorage
-        localStorage.setItem(STORAGE_KEY, backupData);
-        return backupTasks;
-      }
-    }
-    
-    // If no tasks found, try to load from seed data
-    return loadSeedData();
-    
+    return data ? JSON.parse(data) : [];
   } catch (error) {
     console.error('Error loading tasks from localStorage:', error);
-    
-    // Try loading seed data as fallback
-    try {
-      return loadSeedData();
-    } catch (seedError) {
-      console.error('Error loading seed data:', seedError);
-      return [];
-    }
+    return [];
   }
 }
 
 /**
- * Save tasks to localStorage with automatic backup
+ * Save tasks to localStorage and sync to seed format
  * @param {Array} tasks - Array of task objects to save
  * @returns {boolean} Success status
  */
@@ -74,23 +45,14 @@ export function saveTasks(tasks) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     
-    // Create automatic backup every time tasks are saved
-    if (tasks.length > 0) {
-      createAutomaticBackup(tasks);
+    // Auto-sync to seed format if enabled
+    if (getAutoSyncSetting()) {
+      syncToSeedFormat(tasks);
     }
     
     return true;
   } catch (error) {
     console.error('Error saving tasks to localStorage:', error);
-    
-    // Try to fallback to backup storage if localStorage fails
-    try {
-      sessionStorage.setItem(STORAGE_KEY + '_backup', JSON.stringify(tasks));
-      console.warn('Tasks saved to sessionStorage backup due to localStorage error');
-    } catch (backupError) {
-      console.error('Backup storage also failed:', backupError);
-    }
-    
     return false;
   }
 }
@@ -383,4 +345,126 @@ export function checkStorageAvailability() {
       error: error.message
     };
   }
+}
+
+/**
+ * Get auto-sync setting for seed.json updates
+ * @returns {boolean} Auto-sync enabled status
+ */
+export function getAutoSyncSetting() {
+  try {
+    const settings = loadSettings();
+    return settings.autoSyncSeed || false;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Set auto-sync setting for seed.json updates
+ * @param {boolean} enabled - Enable/disable auto-sync
+ * @returns {boolean} Success status
+ */
+export function setAutoSyncSetting(enabled) {
+  try {
+    const settings = loadSettings();
+    settings.autoSyncSeed = enabled;
+    return saveSettings(settings);
+  } catch (error) {
+    console.error('Error setting auto-sync setting:', error);
+    return false;
+  }
+}
+
+/**
+ * Sync current tasks to seed.json format and auto-download
+ * @param {Array} tasks - Current tasks array
+ * @returns {boolean} Success status
+ */
+export function syncToSeedFormat(tasks) {
+  try {
+    // Format tasks to match seed.json structure
+    const seedData = tasks.map(task => ({
+      id: task.id,
+      title: task.title,
+      dueDate: task.dueDate,
+      duration: task.duration,
+      tag: task.tag,
+      description: task.description || '',
+      createdAt: task.createdAt || generateTimestamp(),
+      updatedAt: generateTimestamp()
+    }));
+    
+    // Auto-download the updated seed.json
+    const jsonString = JSON.stringify(seedData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'seed.json';
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    URL.revokeObjectURL(url);
+    
+    console.log('Seed.json updated and downloaded with current tasks');
+    return true;
+  } catch (error) {
+    console.error('Error syncing to seed format:', error);
+    return false;
+  }
+}
+
+/**
+ * Manually trigger seed.json sync and download
+ * @param {Array} tasks - Current tasks array
+ * @returns {boolean} Success status
+ */
+export function downloadUpdatedSeed(tasks) {
+  return syncToSeedFormat(tasks);
+}
+
+/**
+ * Show sync notification to user
+ * @param {string} message - Notification message
+ */
+function showSyncNotification(message) {
+  // Create a simple notification
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    z-index: 10000;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  `;
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  // Fade in
+  setTimeout(() => {
+    notification.style.opacity = '1';
+  }, 100);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
 }

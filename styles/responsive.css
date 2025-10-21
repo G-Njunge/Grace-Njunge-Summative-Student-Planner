@@ -39,11 +39,7 @@
     height: 480px;
   }
 
-  .floating-icon {
-    width: 40px;
-    height: 40px;
-    font-size: var(--font-size-lg);
-  }
+
 
   /* Features Grid Mobile */
   .features-grid {

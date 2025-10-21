@@ -23,30 +23,74 @@ export function generateTimestamp() {
 }
 
 /**
- * Load tasks from localStorage
+ * Load tasks from localStorage with fallback mechanisms
  * @returns {Array} Array of task objects
  */
 export function loadTasks() {
   try {
+    // Try loading from localStorage first
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    if (data) {
+      const tasks = JSON.parse(data);
+      if (Array.isArray(tasks) && tasks.length > 0) {
+        return tasks;
+      }
+    }
+    
+    // If localStorage is empty, try sessionStorage backup
+    const backupData = sessionStorage.getItem(STORAGE_KEY + '_backup');
+    if (backupData) {
+      const backupTasks = JSON.parse(backupData);
+      if (Array.isArray(backupTasks) && backupTasks.length > 0) {
+        console.info('Loaded tasks from sessionStorage backup');
+        // Save back to localStorage
+        localStorage.setItem(STORAGE_KEY, backupData);
+        return backupTasks;
+      }
+    }
+    
+    // If no tasks found, try to load from seed data
+    return loadSeedData();
+    
   } catch (error) {
     console.error('Error loading tasks from localStorage:', error);
-    return [];
+    
+    // Try loading seed data as fallback
+    try {
+      return loadSeedData();
+    } catch (seedError) {
+      console.error('Error loading seed data:', seedError);
+      return [];
+    }
   }
 }
 
 /**
- * Save tasks to localStorage
+ * Save tasks to localStorage with automatic backup
  * @param {Array} tasks - Array of task objects to save
  * @returns {boolean} Success status
  */
 export function saveTasks(tasks) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    
+    // Create automatic backup every time tasks are saved
+    if (tasks.length > 0) {
+      createAutomaticBackup(tasks);
+    }
+    
     return true;
   } catch (error) {
     console.error('Error saving tasks to localStorage:', error);
+    
+    // Try to fallback to backup storage if localStorage fails
+    try {
+      sessionStorage.setItem(STORAGE_KEY + '_backup', JSON.stringify(tasks));
+      console.warn('Tasks saved to sessionStorage backup due to localStorage error');
+    } catch (backupError) {
+      console.error('Backup storage also failed:', backupError);
+    }
+    
     return false;
   }
 }

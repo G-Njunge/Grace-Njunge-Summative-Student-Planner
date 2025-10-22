@@ -28,12 +28,6 @@ export function loadTasks() {
 export function saveTasks(tasks) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    
-    // Auto-sync to seed format if enabled
-    if (getAutoSyncSetting()) {
-      syncToSeedFormat(tasks);
-    }
-    
     return true;
   } catch (error) {
     console.error('Error saving tasks to localStorage:', error);

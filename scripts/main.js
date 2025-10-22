@@ -3,7 +3,7 @@
 import { initializeState, stateManager, uiActions } from './state.js';
 import { initializeUI, uiManager } from './ui.js';
 import { searchManager } from './search.js';
-import { loadSettings, saveSettings, getAutoSyncSetting, setAutoSyncSetting, downloadUpdatedSeed, loadTasks } from './storage.js';
+import { loadSettings, saveSettings } from './storage.js';
 
 // Shows date format preview in settings
 function updateDateFormatExample(format) {
@@ -168,72 +168,9 @@ function initializeSettingsPage() {
       window.uiManager.showToast('Date format preference updated successfully', 'success');
     }
   });
-
-  // Initialize sync settings
-  initializeSyncSettings();
 }
 
-/**
- * Initialize sync settings on settings page
- */
-function initializeSyncSettings() {
-  const autoSyncCheckbox = document.getElementById('auto-sync-seed');
-  const downloadSeedBtn = document.getElementById('download-seed-now');
-  const syncStatusBtn = document.getElementById('sync-status');
 
-  if (!autoSyncCheckbox) return; // Not on settings page
-
-  // Load current auto-sync setting
-  autoSyncCheckbox.checked = getAutoSyncSetting();
-
-  // Auto-sync checkbox event listener
-  autoSyncCheckbox.addEventListener('change', (e) => {
-    const enabled = e.target.checked;
-    setAutoSyncSetting(enabled);
-    
-    if (window.uiManager && window.uiManager.showToast) {
-      const message = enabled ? 
-        'Auto-sync enabled - seed.json will download automatically when tasks change' : 
-        'Auto-sync disabled';
-      window.uiManager.showToast(message, 'success');
-    }
-    
-    console.log('Auto-sync setting updated to:', enabled);
-  });
-
-  // Manual download button
-  downloadSeedBtn.addEventListener('click', () => {
-    try {
-      const tasks = loadTasks();
-      const success = downloadUpdatedSeed(tasks);
-      
-      if (success && window.uiManager && window.uiManager.showToast) {
-        window.uiManager.showToast('seed.json downloaded successfully', 'success');
-      }
-    } catch (error) {
-      console.error('Error downloading seed.json:', error);
-      if (window.uiManager && window.uiManager.showToast) {
-        window.uiManager.showToast('Error downloading seed.json', 'error');
-      }
-    }
-  });
-
-  // Sync status button
-  syncStatusBtn.addEventListener('click', () => {
-    const tasks = loadTasks();
-    const isAutoSync = getAutoSyncSetting();
-    const taskCount = tasks.length;
-    
-    const statusMessage = `
-      Sync Status:
-      • Auto-sync: ${isAutoSync ? 'Enabled' : 'Disabled'}
-      • Current tasks: ${taskCount}
-      • Last sync: ${isAutoSync ? 'Automatic on changes' : 'Manual only'}
-    `;
-    
-    alert(statusMessage);
-  });
-}
 
 /**
  * Application class

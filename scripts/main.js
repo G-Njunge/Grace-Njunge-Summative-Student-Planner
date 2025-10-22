@@ -244,9 +244,8 @@ class CampusLifePlanner {
     this.version = '1.0.0';
   }
   
-  /**
-   * Initialize the application
-   */
+  //Initialize the application
+  
   async initialize() {
     if (this.isInitialized) {
       console.warn('Application already initialized');
@@ -352,9 +351,8 @@ class CampusLifePlanner {
     }
   }
   
-  /**
-   * Initialize search manager
-   */
+  //nitialize search manager
+   
   initializeSearchManager() {
     // Listen for tasks changes to update search index
     stateManager.subscribe('tasks', (tasks) => {
@@ -362,9 +360,8 @@ class CampusLifePlanner {
     });
   }
   
-  /**
-   * Set active navigation link based on current page
-   */
+  // Set active navigation link based on current page
+
   setActiveNavLink() {
     const navLinks = document.querySelectorAll('.nav-link');
     const currentPage = window.location.pathname;
@@ -386,9 +383,7 @@ class CampusLifePlanner {
     });
   }
   
-  /**
-   * Setup global error handling
-   */
+  //Setup global error handling
   setupErrorHandling() {
     // Handle uncaught errors
     window.addEventListener('error', (event) => {
@@ -494,9 +489,8 @@ class CampusLifePlanner {
     }
   }
   
-  /**
-   * Show update notification
-   */
+  //Show update notification
+  
   showUpdateNotification() {
     const notification = document.createElement('div');
     notification.className = 'update-notification';
@@ -536,9 +530,8 @@ class CampusLifePlanner {
     }, 10000);
   }
   
-  /**
-   * Setup keyboard shortcuts
-   */
+  //Setup keyboard shortcuts
+
   setupKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
       // Only handle shortcuts when not in input fields
@@ -633,9 +626,8 @@ class CampusLifePlanner {
     });
   }
   
-  /**
-   * Setup performance monitoring
-   */
+  // Setup performance monitoring
+  
   setupPerformanceMonitoring() {
     // Monitor page load performance
     window.addEventListener('load', () => {

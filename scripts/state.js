@@ -6,9 +6,7 @@
 import { generateId, generateTimestamp, loadTasks, saveTasks, loadSettings, saveSettings } from './storage.js';
 import { validateTask } from './validators.js';
 
-/**
- * Application state structure
- */
+// Initial app state
 const initialState = {
   // Core data
   tasks: [],

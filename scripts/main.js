@@ -1,18 +1,10 @@
-/**
- * Main Application Entry Point
- * Campus Life Planner - Student Task Management System
- * 
- * This module initializes the application and coordinates all modules
- */
-
+ // This file is the main application entry point 
 import { initializeState, stateManager, uiActions } from './state.js';
 import { initializeUI, uiManager } from './ui.js';
 import { searchManager } from './search.js';
 import { loadSettings, saveSettings, getAutoSyncSetting, setAutoSyncSetting, downloadUpdatedSeed, loadTasks } from './storage.js';
 
-/**
- * Update date format example display
- */
+//Update date format example display
 function updateDateFormatExample(format) {
   const exampleElement = document.getElementById('date-format-example');
   if (!exampleElement) return;
@@ -40,9 +32,7 @@ function updateDateFormatExample(format) {
   exampleElement.textContent = `Example: ${example}`;
 }
 
-/**
- * Initialize task form fields based on preferences
- */
+ //Initialize task form fields based on preferences on the settings page
 function initializeTaskForm() {
   const taskDurationInput = document.getElementById('task-duration');
   const taskDurationLabel = document.getElementById('task-duration-unit-label');
@@ -55,26 +45,24 @@ function initializeTaskForm() {
   // Update label text
   taskDurationLabel.textContent = timeUnit;
   
-  // Update input step, placeholder, and max based on time unit
+  // Update input step, placeholder, time unit one can input
   if (timeUnit === 'minutes') {
     taskDurationInput.step = '15';
     taskDurationInput.placeholder = '60';
-    taskDurationInput.max = '1200'; // 20 hours = 1200 minutes
+    taskDurationInput.max = '1200'; 
   } else {
     taskDurationInput.step = '0.25';
     taskDurationInput.placeholder = '2.5';
-    taskDurationInput.max = '20'; // 20 hours
+    taskDurationInput.max = '20'; 
   }
 }
 
-/**
- * Initialize settings page
- */
+// Initialize the settings page
 function initializeSettingsPage() {
   const timeUnitSelect = document.getElementById('time-unit');
   const dateFormatSelect = document.getElementById('date-format');
   
-  if (!timeUnitSelect) return; // Not on settings page
+  if (!timeUnitSelect) return; 
   
   // Load current settings
   const settings = loadSettings();
@@ -92,27 +80,27 @@ function initializeSettingsPage() {
     capUnitLabel.textContent = settings.timeUnit || 'hours';
   }
   
-  // Update duration cap input step based on time unit
+  // Update the duration input step based on time unit specified on the settings page
   const capInput = document.getElementById('duration-cap');
   if (capInput) {
     const timeUnit = settings.timeUnit || 'hours';
     capInput.step = timeUnit === 'minutes' ? '15' : '0.5';
   }
   
-  // Add event listeners
+  // Addition of  event listeners
   timeUnitSelect.addEventListener('change', (e) => {
     const oldSettings = loadSettings();
     const oldUnit = oldSettings.timeUnit || 'hours';
     const newUnit = e.target.value;
     
-    // Convert duration cap if it exists
+    // Convertion of duration cap 
     let newDurationCap = oldSettings.durationCap;
     if (newDurationCap && oldUnit !== newUnit) {
       if (oldUnit === 'hours' && newUnit === 'minutes') {
-        // Convert hours to minutes
+        // Converts hours to minutes
         newDurationCap = newDurationCap * 60;
       } else if (oldUnit === 'minutes' && newUnit === 'hours') {
-        // Convert minutes to hours
+        // Converts minutes to hours
         newDurationCap = newDurationCap / 60;
       }
     }

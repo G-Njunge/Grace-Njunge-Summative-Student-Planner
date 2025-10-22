@@ -1,9 +1,8 @@
-/* ===== CAMPUS LIFE PLANNER - MAIN STYLES ===== */
-/* Inspired by Check Me app's design with glass effects and modern aesthetics */
+/* Main styles for orderly */
 
-/* ===== CSS CUSTOM PROPERTIES ===== */
+/* Color scheme and design tokens */
 :root {
-  /* Orange Color Palette */
+  /* Brand colors */
   --primary-color: #f97316;
   --primary-light: #fb923c;
   --primary-dark: #ea580c;
@@ -13,11 +12,11 @@
   --pink-medium: #fdba74;
   --pink-dark: #c2410c;
   
-  /* Dark theme colors */
+  /* Dark backgrounds */
   --dark-bg: #1a1d2e;
   --darker-bg: #0f1117;
   
-  /* Neutral Colors */
+  /* Grays and neutrals */
   --white: #ffffff;
   --gray-50: #f9fafb;
   --gray-100: #f3f4f6;
@@ -30,19 +29,19 @@
   --gray-800: #1f2937;
   --gray-900: #111827;
   
-  /* Semantic Colors */
+  /* Status colors */
   --success-color: #10b981;
   --warning-color: #f59e0b;
   --error-color: #ef4444;
   --info-color: #3b82f6;
   
-  /* Glass Effect Variables */
+  /* Glass effects */
   --glass-bg: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-shadow: none;
   --glass-backdrop: none;
   
-  /* Typography */
+  /* Text styles */
   --font-family: 'Arial', 'Helvetica', sans-serif;
   --font-size-xs: 0.6875rem;
   --font-size-sm: 0.8125rem;
@@ -94,7 +93,7 @@
   --z-tooltip: 1070;
 }
 
-/* ===== RESET & BASE STYLES ===== */
+/* Reset and base styles */
 *,
 *::before,
 *::after {
@@ -120,9 +119,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ===== ACCESSIBILITY ===== */
-
-/* Focus styles */
+/* Focus states for accessibility */
 :focus {
   outline: 2px solid var(--gray-600);
   outline-offset: 2px;
@@ -150,7 +147,7 @@ body {
   border: 0;
 }
 
-/* ===== LAYOUT ===== */
+/* Main layout */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -169,7 +166,7 @@ body {
   }
 }
 
-/* ===== GLASS EFFECT COMPONENT ===== */
+/* Glass effect styling */
 .glass-effect {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-backdrop);
@@ -188,7 +185,7 @@ body {
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* ===== HEADER & NAVIGATION - ROUNDED & CENTERED ===== */
+/* Header and navigation */
 .header {
   position: static;
   top: 0;
@@ -372,13 +369,13 @@ html {
   border-bottom: 3px solid var(--primary-color);
 }
 
-/* ===== MAIN CONTENT ===== */
+/* Main content area */
 .main {
   padding-top: 32px; /* reduced since header is not fixed */
   min-height: 100vh;
 }
 
-/* ===== HERO SECTION - DARK THEME ===== */
+/* Hero section */
 .hero-section {
   min-height: 100vh;
   display: flex;
@@ -451,7 +448,7 @@ html {
   font-weight: 600;
 }
 
-/* ===== HERO VISUAL ===== */
+/* Hero visuals */
 .hero-visual {
   display: none;
 }
@@ -551,7 +548,7 @@ html {
 
 
 
-/* ===== WHITE SECTIONS (FEATURES, APP) ===== */
+/* Light content sections */
 .section:not(.hero-section) {
   background: var(--white);
   min-height: 100vh;
@@ -673,7 +670,7 @@ html {
   margin-bottom: var(--space-8);
 }
 
-/* ===== STATS GRID ===== */
+/* Dashboard stats */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -726,7 +723,7 @@ html {
   margin: 0;
 }
 
-/* ===== CAP SECTION ===== */
+/* Duration cap controls */
 .cap-section {
   margin-bottom: var(--space-8);
 }
@@ -795,10 +792,7 @@ html {
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-/* ===== RECENT TASKS ===== */
-/* recent-tasks removed */
-
-/* ===== TODAY'S TASKS ===== */
+/* Today's tasks */
 .todays-tasks h3 {
   font-size: var(--font-size-xl);
   font-weight: 600;
@@ -929,7 +923,7 @@ html {
 
 /* recent-tasks removed */
 
-/* ===== BUTTONS ===== */
+/* Button styles */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -995,7 +989,7 @@ html {
   transform: translateY(-2px);
 }
 
-/* ===== FORMS ===== */
+/* Form controls */
 .form-group {
   margin-bottom: var(--space-6);
 }
@@ -1147,7 +1141,7 @@ select option:checked {
   margin-top: var(--space-8);
 }
 
-/* ===== LOADING & EMPTY STATES ===== */
+/* Loading and empty states */
 .loading {
   text-align: center;
   padding: var(--space-8);
@@ -1177,7 +1171,7 @@ select option:checked {
   margin-bottom: var(--space-6);
 }
 
-/* ===== FOOTER ===== */
+/* Footer */
 .footer {
   background: rgba(30, 30, 50, 0.9);
   backdrop-filter: blur(10px);
@@ -1211,7 +1205,7 @@ select option:checked {
   color: var(--primary-color);
 }
 
-/* ===== MODAL ===== */
+/* Modal dialogs */
 .modal {
   position: fixed;
   top: 0;
@@ -1295,7 +1289,7 @@ select option:checked {
   color: var(--gray-600) !important;
 }
 
-/* ===== UTILITIES ===== */
+/* Utility classes */
 .text-center {
   text-align: center;
 }
@@ -1328,7 +1322,7 @@ select option:checked {
   display: block !important;
 }
 
-/* ===== ANIMATIONS ===== */
+/* Animations */
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -1352,7 +1346,7 @@ select option:checked {
   animation: spin 1s linear infinite;
 }
 
-/* ===== ABOUT SECTION ===== */
+/* About page */
 .about-content {
   padding: 2rem;
 }
@@ -1459,7 +1453,7 @@ select option:checked {
   }
 }
 
-/* ===== PRINT STYLES ===== */
+/* Print styles */
 @media print {
   .header,
   .footer,
@@ -1479,7 +1473,7 @@ select option:checked {
   }
 }
 
-/* ===== REMOVE ALL GLOWING EFFECTS ===== */
+/* Remove glowing effects */
 * {
   box-shadow: none !important;
   text-shadow: none !important;

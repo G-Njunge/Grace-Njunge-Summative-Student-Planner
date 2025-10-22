@@ -1,7 +1,4 @@
-/**
- * UI Module - DOM manipulation and user interface management
- * Handles rendering, event binding, and user interactions
- */
+// Handles all user interface updates and interactions
 
 import { stateManager, taskActions, uiActions, settingsActions } from './state.js';
 import { searchManager, filterTasks, sortTasks } from './search.js';
@@ -9,21 +6,12 @@ import { validateField } from './validators.js';
 import { formatDuration, formatDate } from './utils.js';
 import { loadSettings } from './storage.js';
 
-/**
- * DOM element selectors
- */
+// Element selectors for DOM manipulation
 const SELECTORS = {
-  // Navigation
   navToggle: '.nav-toggle',
   navMenu: '.nav-menu',
   navLinks: '.nav-link',
-  
-  // Sections
   sections: '.section',
-  
-  // Dashboard stats and homepage widgets removed from index.html
-  
-  // Tasks
   searchInput: '#search-input',
   searchBtn: '#search-btn',
   caseSensitiveCheckbox: '#case-sensitive',

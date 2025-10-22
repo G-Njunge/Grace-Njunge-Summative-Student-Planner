@@ -1,31 +1,19 @@
-/**
- * Storage Module - Handles localStorage and data persistence
- * Provides functions for saving, loading, and managing application data
- */
+// Handles saving and loading tasks from localStorage
 
 const STORAGE_KEY = 'campus-life-planner-data';
 const SETTINGS_KEY = 'campus-life-planner-settings';
 
-/**
- * Generate a unique ID for tasks
- * @returns {string} Unique identifier
- */
+// Creates unique IDs for new tasks
 export function generateId() {
   return `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-/**
- * Generate timestamp for created/updated dates
- * @returns {string} ISO timestamp
- */
+// Gets current timestamp
 export function generateTimestamp() {
   return new Date().toISOString();
 }
 
-/**
- * Load tasks from localStorage
- * @returns {Array} Array of task objects
- */
+// Loads tasks from browser storage
 export function loadTasks() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
@@ -36,11 +24,7 @@ export function loadTasks() {
   }
 }
 
-/**
- * Save tasks to localStorage and sync to seed format
- * @param {Array} tasks - Array of task objects to save
- * @returns {boolean} Success status
- */
+// Saves tasks to browser storage
 export function saveTasks(tasks) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
@@ -57,10 +41,7 @@ export function saveTasks(tasks) {
   }
 }
 
-/**
- * Load settings from localStorage
- * @returns {Object} Settings object
- */
+// Loads user preferences
 export function loadSettings() {
   try {
     const data = localStorage.getItem(SETTINGS_KEY);

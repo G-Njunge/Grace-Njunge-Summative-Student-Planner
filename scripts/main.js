@@ -1,18 +1,11 @@
-/**
- * Main Application Entry Point
- * Campus Life Planner - Student Task Management System
- * 
- * This module initializes the application and coordinates all modules
- */
+// Main app initialization and coordination
 
 import { initializeState, stateManager, uiActions } from './state.js';
 import { initializeUI, uiManager } from './ui.js';
 import { searchManager } from './search.js';
 import { loadSettings, saveSettings, getAutoSyncSetting, setAutoSyncSetting, downloadUpdatedSeed, loadTasks } from './storage.js';
 
-/**
- * Update date format example display
- */
+// Shows date format preview in settings
 function updateDateFormatExample(format) {
   const exampleElement = document.getElementById('date-format-example');
   if (!exampleElement) return;
